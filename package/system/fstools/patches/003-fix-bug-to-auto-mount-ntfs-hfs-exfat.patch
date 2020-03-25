@@ -1,0 +1,44 @@
+From fc43fb1dcb68779fc2c438edfc9112c8e96c7b2b Mon Sep 17 00:00:00 2001
+From: "brian.shen" <brian.shen@realtek.com>
+Date: Tue, 29 Jan 2019 14:35:27 +0800
+Subject: [PATCH] [DEV_FIX] Fix bug to auto mount ntfs, hfs+, exfat
+
+1.NAS-562: fix bug to auto mount ntfs, hfs+, exfat
+---
+ block.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
+
+diff --git a/block.c b/block.c
+index 1ce28e3..2b70119 100644
+--- a/block.c
++++ b/block.c
+@@ -880,7 +880,10 @@ static int handle_mount(const char *source, const char *target,
+ 	size_t mount_opts_len;
+ 	char *mount_opts = NULL, *ptr;
+ 	uint32_t flags = 0;
++	const char *fstypeptr;
++	const char* str_ufsd = "ufsd";
+ 
++	fstypeptr = fstype;
+ 	if (fstype) {
+ 		if (!strncmp(fstype, "ext", 3) || !strcmp(fstype, "btrfs"))
+ 			flags = MS_NOATIME;
+@@ -889,13 +892,14 @@ static int handle_mount(const char *source, const char *target,
+ 				!strcmp(fstype, "exfat") ||
+ 				!strcmp(fstype, "ufsd")) {
+ 			flags = MS_NOATIME;
++			fstypeptr = str_ufsd;
+ 			mount_opts = "force,nls=utf8,uid=1023,gid=1023,umask=0007,user_xattr=1";
+ 		}
+ 		else if (!strcmp(fstype, "vfat"))
+ 			mount_opts = "utf8,uid=1023,gid=1023,dmask=0007,fmask=0007,shortname=mixed";
+ 	}
+ 
+-	err = mount(source, target, fstype, m ? m->flags : flags ? flags : 0,
++	err = mount(source, target, fstypeptr, m ? m->flags : flags ? flags : 0,
+ 	            (m && m->options) ? m->options : (mount_opts) ? mount_opts : "");
+ 
+ 	/* Requested file system type is not available in kernel,
+-- 
+2.7.4
+

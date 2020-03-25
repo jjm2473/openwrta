@@ -1,0 +1,128 @@
+menuconfig RTK_ANDROID
+	bool "Enable Android"
+	depends on TARGET_realtek
+	default TARGET_realtek_rtd129x_zidoo-x9s || TARGET_realtek_rtd129x_zidoo-z9s
+	select PACKAGE_rtk-init
+	select PACKAGE_rtk-android-rootfs
+	select PACKAGE_rtk-android-kmods
+	select PACKAGE_rtk-android-xubus
+	select PACKAGE_kmod-fs-ext4
+
+	config RTK_ANDROID_VERSION
+		string "Android rootfs version"
+		depends on RTK_ANDROID
+		default "6.0.1" if TARGET_realtek_rtd129x_zidoo-x9s
+		default "7.1.1" if TARGET_realtek_rtd129x_zidoo-z9s
+
+	config RTK_ANDROID_KMOD_VERSION
+		string "Android kmods version"
+		depends on RTK_ANDROID
+		default "4.1.17-g9100299-dirty" if TARGET_realtek_rtd129x_zidoo-x9s
+		default "4.1.35-04005-g6c2818e-dirty" if TARGET_realtek_rtd129x_zidoo-z9s
+
+menuconfig RTK_NAS_PACKAGES
+	bool "Enable NAS packages"
+	depends on TARGET_realtek
+	default y
+	select BUSYBOX_CONFIG_RENICE
+	select BUSYBOX_CONFIG_START_STOP_DAEMON
+	select PACKAGE_kmod-rtl8168
+	help
+	  Select NAS packages: SMB, FTP, AFP, DLNA, DAAP, BT and disk management.
+
+	config RTK_NAS_LUCI
+		bool "Enable Luci"
+		depends on RTK_NAS_PACKAGES
+		default y
+		select PACKAGE_luci
+		select LUCI_LANG_zh_Hans
+		select PACKAGE_luci-theme-material
+		help
+		  Enalbe Luci
+
+	choice
+		prompt "Choose NAS configurations"
+		default RTK_NAS_FULL
+		depends on RTK_NAS_PACKAGES
+		help
+		  Choose configuration on combination of NAS services.
+
+		config RTK_NAS_FULL
+			bool "Full services"
+			select RTK_NAS_SMB
+			select RTK_NAS_FTP
+			select RTK_NAS_AFP
+			select RTK_NAS_DLNA
+			help
+			  All file transfer(SMB/FTP/AFP) and streaming(DLNA/DAAP) services.
+
+		config RTK_NAS_FILE
+			bool "File services"
+			select RTK_NAS_SMB
+			select RTK_NAS_FTP
+			select RTK_NAS_AFP
+			help
+			  Only file transfer services: SMB, FTP and AFP(Time Machine).
+
+		config RTK_NAS_STREAM
+			bool "Streaming services"
+			select RTK_NAS_DLNA
+			select RTK_NAS_DAAP
+			help
+			  Only streaming services: DLNA and DAAP(iTunes).
+	endchoice
+
+	config RTK_NAS_P2P_ARIA2
+		bool "Aria2"
+		depends on RTK_NAS_PACKAGES
+		default y
+		select PACKAGE_aria2
+		select PACKAGE_webui-aria2
+		select PACKAGE_luci-app-aria2 if RTK_NAS_LUCI
+
+	config RTK_NAS_P2P_TRANSMISSIONBT
+		bool "Transmission BT"
+		depends on RTK_NAS_PACKAGES
+		default y
+		select PACKAGE_transmission-daemon-mbedtls
+		select PACKAGE_transmission-web
+		select PACKAGE_luci-app-transmission if RTK_NAS_LUCI
+
+	config RTK_NAS_RAID
+		bool "RAID: Multi-bay HDD support"
+		depends on RTK_NAS_PACKAGES
+		default y
+		select PACKAGE_mdadm
+		select PACKAGE_luci-app-diskmanager if RTK_NAS_LUCI
+		help
+		  Enalbe RAID support with disk management on web UI.
+
+config RTK_NAS_SMB
+	bool
+	depends on RTK_NAS_PACKAGES
+	select PACKAGE_samba4-server
+	select PACKAGE_luci-app-samba4 if RTK_NAS_LUCI
+
+config RTK_NAS_FTP
+	bool
+	depends on RTK_NAS_PACKAGES
+	select PACKAGE_vsftpd-tls
+	select PACKAGE_luci-app-vsftpd if RTK_NAS_LUCI
+
+config RTK_NAS_AFP
+	bool
+	depends on RTK_NAS_PACKAGES
+	select PACKAGE_netatalk
+	select PACKAGE_luci-app-netatalk if RTK_NAS_LUCI
+
+config RTK_NAS_DLNA
+	bool
+	depends on RTK_NAS_PACKAGES
+	select PACKAGE_minidlna
+	select PACKAGE_luci-app-minidlna if RTK_NAS_LUCI
+
+config RTK_NAS_DAAP
+	bool
+	depends on RTK_NAS_PACKAGES
+	select PACKAGE_forked-daapd
+	select PACKAGE_luci-app-forked-daapd if RTK_NAS_LUCI

@@ -1,0 +1,10 @@
+#!/bin/sh /etc/rc.common
+# 2020 jjm2473 porting openwrt 19.07+ to zidoo z9s
+
+START=01
+
+boot() {
+	# notify android continue
+	touch /android/.coldplug_done
+	touch /rom/android/.coldplug_done
+}

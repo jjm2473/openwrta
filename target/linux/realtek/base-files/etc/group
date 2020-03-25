@@ -1,0 +1,12 @@
+root:x:0:
+daemon:x:1:
+adm:x:4:
+mail:x:8:
+audio:x:29:
+www-data:x:33:
+ftp:x:55:
+users:x:100:
+network:x:101:
+nogroup:x:65534:
+aid_inet:x:3003:nobody
+media_rw:x:1023:ftp,root

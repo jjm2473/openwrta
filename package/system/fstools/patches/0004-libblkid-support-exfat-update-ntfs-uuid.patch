@@ -1,0 +1,234 @@
+From b63ee11d2feecb02487c7b71136ac743861bb7bc Mon Sep 17 00:00:00 2001
+From: "brian.shen" <brian.shen@realtek.com>
+Date: Thu, 24 Jan 2019 20:22:17 +0800
+Subject: [PATCH] [DEV_FIX] libblkid support exfat, update ntfs uuid
+
+1. libblkid add exfat support
+2. correct ntfs uuid
+---
+ CMakeLists.txt                |   1 +
+ libblkid-tiny/exfat.c         | 146 ++++++++++++++++++++++++++++++++++++++++++
+ libblkid-tiny/libblkid-tiny.c |  63 +++++++++++++++++-
+ libblkid-tiny/ntfs.c          |  85 ++++++++++++------------
+ libblkid-tiny/superblocks.h   |   2 +
+ 5 files changed, 252 insertions(+), 45 deletions(-)
+ create mode 100644 libblkid-tiny/exfat.c
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index fd297cc..6a470b8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -38,6 +38,7 @@ ADD_LIBRARY(blkid-tiny SHARED
+ 		libblkid-tiny/squashfs.c
+ 		libblkid-tiny/btrfs.c
+ 		libblkid-tiny/f2fs.c
++		libblkid-tiny/exfat.c
+ 		)
+ INSTALL(TARGETS blkid-tiny LIBRARY DESTINATION lib)
+ 
+diff --git a/libblkid-tiny/exfat.c b/libblkid-tiny/exfat.c
+new file mode 100644
+index 0000000..89d7608
+--- /dev/null
++++ b/libblkid-tiny/exfat.c
+@@ -0,0 +1,146 @@
++/*
++ * Copyright (C) 2010 Andrew Nayenko <resver@gmail.com>
++ *
++ * This file may be redistributed under the terms of the
++ * GNU Lesser General Public License.
++ */
++#include "superblocks.h"
++
++struct exfat_super_block {
++	uint8_t jump[3];
++	uint8_t oem_name[8];
++	uint8_t	__unused1[53];
++	uint64_t block_start;
++	uint64_t block_count;
++	uint32_t fat_block_start;
++	uint32_t fat_block_count;
++	uint32_t cluster_block_start;
++	uint32_t cluster_count;
++	uint32_t rootdir_cluster;
++	uint8_t volume_serial[4];
++	struct {
++		uint8_t minor;
++		uint8_t major;
++	} version;
++	uint16_t volume_state;
++	uint8_t block_bits;
++	uint8_t bpc_bits;
++	uint8_t fat_count;
++	uint8_t drive_no;
++	uint8_t allocated_percent;
++} __attribute__((__packed__));
++
++struct exfat_entry_label {
++	uint8_t type;
++	uint8_t length;
++	uint8_t name[30];
++} __attribute__((__packed__));
++
++#define BLOCK_SIZE(sb) (1 << (sb)->block_bits)
++#define CLUSTER_SIZE(sb) (BLOCK_SIZE(sb) << (sb)->bpc_bits)
++#define EXFAT_FIRST_DATA_CLUSTER 2
++#define EXFAT_LAST_DATA_CLUSTER 0xffffff6
++#define EXFAT_ENTRY_SIZE 32
++
++#define EXFAT_ENTRY_EOD		0x00
++#define EXFAT_ENTRY_LABEL	0x83
++
++static blkid_loff_t block_to_offset(const struct exfat_super_block *sb,
++		blkid_loff_t block)
++{
++	return (blkid_loff_t) block << sb->block_bits;
++}
++
++static blkid_loff_t cluster_to_block(const struct exfat_super_block *sb,
++		uint32_t cluster)
++{
++	return le32_to_cpu(sb->cluster_block_start) +
++			((blkid_loff_t) (cluster - EXFAT_FIRST_DATA_CLUSTER)
++					<< sb->bpc_bits);
++}
++
++static blkid_loff_t cluster_to_offset(const struct exfat_super_block *sb,
++		uint32_t cluster)
++{
++	return block_to_offset(sb, cluster_to_block(sb, cluster));
++}
++
++static uint32_t next_cluster(blkid_probe pr,
++		const struct exfat_super_block *sb, uint32_t cluster)
++{
++	uint32_t *next;
++	blkid_loff_t fat_offset;
++
++	fat_offset = block_to_offset(sb, le32_to_cpu(sb->fat_block_start))
++		+ (blkid_loff_t) cluster * sizeof(cluster);
++	next = (uint32_t *) blkid_probe_get_buffer(pr, fat_offset,
++			sizeof(uint32_t));
++	if (!next)
++		return 0;
++	return le32_to_cpu(*next);
++}
++
++static struct exfat_entry_label *find_label(blkid_probe pr,
++		const struct exfat_super_block *sb)
++{
++	uint32_t cluster = le32_to_cpu(sb->rootdir_cluster);
++	blkid_loff_t offset = cluster_to_offset(sb, cluster);
++	uint8_t *entry;
++
++	for (;;) {
++		entry = (uint8_t *) blkid_probe_get_buffer(pr, offset,
++				EXFAT_ENTRY_SIZE);
++		if (!entry)
++			return NULL;
++		if (entry[0] == EXFAT_ENTRY_EOD)
++			return NULL;
++		if (entry[0] == EXFAT_ENTRY_LABEL)
++			return (struct exfat_entry_label *) entry;
++		offset += EXFAT_ENTRY_SIZE;
++		if (offset % CLUSTER_SIZE(sb) == 0) {
++			cluster = next_cluster(pr, sb, cluster);
++			if (cluster < EXFAT_FIRST_DATA_CLUSTER)
++				return NULL;
++			if (cluster > EXFAT_LAST_DATA_CLUSTER)
++				return NULL;
++			offset = cluster_to_offset(sb, cluster);
++		}
++	}
++}
++
++static int probe_exfat(blkid_probe pr, const struct blkid_idmag *mag)
++{
++	struct exfat_super_block *sb;
++	struct exfat_entry_label *label;
++
++	sb = blkid_probe_get_sb(pr, mag, struct exfat_super_block);
++	if (!sb)
++		return -1;
++
++	blkid_probe_sprintf_uuid(pr, sb->volume_serial, 4,
++			"%02hhX%02hhX-%02hhX%02hhX",
++			sb->volume_serial[3], sb->volume_serial[2],
++			sb->volume_serial[1], sb->volume_serial[0]);
++
++	blkid_probe_sprintf_version(pr, "%u.%u",
++			sb->version.major, sb->version.minor);
++
++	label = find_label(pr, sb);
++	if (label)
++		blkid_probe_set_utf8label(pr, label->name,
++				min(label->length * 2, 30), BLKID_ENC_UTF16LE);
++
++	return 0;
++}
++
++const struct blkid_idinfo exfat_idinfo =
++{
++	.name		= "exfat",
++	.usage		= BLKID_USAGE_FILESYSTEM,
++	.probefunc	= probe_exfat,
++	.magics		=
++	{
++		{ .magic = "EXFAT   ", .len = 8, .sboff = 3 },
++		{ NULL }
++	}
++};
+diff --git a/libblkid-tiny/libblkid-tiny.c b/libblkid-tiny/libblkid-tiny.c
+index f020e23..cd7dd16 100644
+--- a/libblkid-tiny/libblkid-tiny.c
++++ b/libblkid-tiny/libblkid-tiny.c
+@@ -11,6 +11,8 @@
+ #define DEBUG(fmt, ...)
+ #endif
+ 
++#define isspace(x) ((x == ' ') || (x == '\t') || (x == '\r') || (x == '\n'))
++
+ int blkid_debug_mask = 0;
+ 
+ static unsigned char *probe_buffer;
+@@ -152,6 +157,18 @@ int blkid_probe_sprintf_uuid(blkid_probe pr, unsigned char *uuid,
+ 	return 0;
+ }
+ 
++size_t blkid_rtrim_whitespace(unsigned char *str)
++{
++	size_t i = strlen((char *) str);
++
++	while (i--) {
++		if (!isspace(str[i]))
++			break;
++	}
++	str[++i] = '\0';
++	return i;
++}
++
+ static const struct blkid_idinfo *idinfos[] =
+ {
+ 	&vfat_idinfo,
+@@ -171,6 +231,7 @@ static const struct blkid_idinfo *idinfos[] =
+ 	&hfs_idinfo,
+ 	&btrfs_idinfo,
+ 	&f2fs_idinfo,
++	&exfat_idinfo,
+ };
+ 
+ int probe_block(char *block, struct blkid_struct_probe *pr)
+diff --git a/libblkid-tiny/superblocks.h b/libblkid-tiny/superblocks.h
+index cde8a40..e548593 100644
+--- a/libblkid-tiny/superblocks.h
++++ b/libblkid-tiny/superblocks.h
+@@ -101,4 +101,6 @@ extern int blkid_probe_set_id_label(blkid_probe pr, const char *name,
+ extern int blkid_probe_set_utf8_id_label(blkid_probe pr, const char *name,
+ 			     unsigned char *data, size_t len, int enc);
+ 
++extern size_t blkid_encode_to_utf8(int enc, unsigned char *dest, size_t len,
++			     const unsigned char *src, size_t count);
+ #endif /* _BLKID_SUPERBLOCKS_H */
+-- 
+2.7.4
+
