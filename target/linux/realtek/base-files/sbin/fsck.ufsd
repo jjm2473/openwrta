@@ -1,0 +1,58 @@
+#!/bin/bash
+
+DEV_PATH=
+OPT=
+CODE=0
+
+for x in $*; do
+    case "$x" in
+        -a)
+            OPT="-a"
+            ;;
+        -y|-f)
+            OPT="-a -f"
+            ;;
+        /dev/*)
+            DEV_PATH=$x
+            ;;
+        -n)
+            OPT="-a"
+            CODE=252
+            ;;
+    esac
+done
+
+# Assume device unplug if no DEV_PATH given.
+[ "" = "$DEV_PATH" ] && echo "[fsck.ufsd] device not specified!" && exit 2
+[ "" = "$OPT" ] && echo "[fsck.ufsd] No option given!" && exit 0
+
+BIN=
+FS_TYPE=`blkid -o udev -p $DEV_PATH | grep ID_FS_TYPE | awk -F= '{print $2}'`
+# ntfs|exfat|hfs|hfsplus
+case "$FS_TYPE" in
+    ntfs)
+        BIN=/usr/local/sbin/chkntfs
+        ;;
+    exfat)
+        BIN=/usr/local/sbin/chkexfat
+        ;;
+    hfs|hfsplus)
+        BIN=/usr/local/sbin/chkhfs
+        ;;
+esac
+
+if [ "" != "$BIN" ] && [ -f $BIN ]; then
+    echo "[fsck.ufsd] Do file system check on $FS_TYPE!"
+    $BIN $OPT $DEV_PATH
+    RETCODE=$?
+
+    # 1: checked normal, 2: repaired, 252: device mounted
+    # return value between 0 and 1 to indicate success
+    if [ "$RETCODE" -eq 2 ]; then
+        exit 1
+    elif [ "$RETCODE" -eq $CODE ]; then
+        exit 0
+    else
+        exit $RETCODE
+    fi
+fi

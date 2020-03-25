@@ -1,0 +1,39 @@
+diff --git a/block.c b/block.c
+index 14c6d6e..1ce28e3 100644
+--- a/block.c
++++ b/block.c
+@@ -527,6 +527,7 @@ static void cache_load(int mtd)
+ 	_cache_load("/dev/loop*");
+ 	_cache_load("/dev/mmcblk*");
+ 	_cache_load("/dev/sd*");
++	_cache_load("/dev/sata*");
+ 	_cache_load("/dev/hd*");
+ 	_cache_load("/dev/md*");
+ 	_cache_load("/dev/nvme*");
+@@ -878,9 +879,24 @@ static int handle_mount(const char *source, const char *target,
+ 	int i, err;
+ 	size_t mount_opts_len;
+ 	char *mount_opts = NULL, *ptr;
++	uint32_t flags = 0;
++
++	if (fstype) {
++		if (!strncmp(fstype, "ext", 3) || !strcmp(fstype, "btrfs"))
++			flags = MS_NOATIME;
++		else if (!strncmp(fstype, "hfs", 3) ||
++				!strcmp(fstype, "ntfs") ||
++				!strcmp(fstype, "exfat") ||
++				!strcmp(fstype, "ufsd")) {
++			flags = MS_NOATIME;
++			mount_opts = "force,nls=utf8,uid=1023,gid=1023,umask=0007,user_xattr=1";
++		}
++		else if (!strcmp(fstype, "vfat"))
++			mount_opts = "utf8,uid=1023,gid=1023,dmask=0007,fmask=0007,shortname=mixed";
++	}
+ 
+-	err = mount(source, target, fstype, m ? m->flags : 0,
+-	            (m && m->options) ? m->options : "");
++	err = mount(source, target, fstype, m ? m->flags : flags ? flags : 0,
++	            (m && m->options) ? m->options : (mount_opts) ? mount_opts : "");
+ 
+ 	/* Requested file system type is not available in kernel,
+ 	   attempt to call mount helper. */

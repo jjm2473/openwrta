@@ -1,0 +1,37 @@
+#!/bin/sh
+# 2019 jjm2473 porting openwrt 18.06.2+ to zidoo z9s
+
+SERVICES="samba minidlna transmission vsftpd forked-daapd netatalk"
+
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $0 SERVICENAME [enable|disable] "
+  exit 1
+fi
+
+if echo "$SERVICES" | grep -q $1; then
+	SERVICENAME=$1
+	[ "$SERVICENAME" == "netatalk" ] && SERVICENAME="afpd"
+	case "$2" in
+		enable)
+			/sbin/uci set $SERVICENAME.config.enabled=1
+			/sbin/uci commit $SERVICENAME
+			/etc/init.d/$SERVICENAME restart
+			exit 0
+		;;
+
+		disable)
+			/sbin/uci set $SERVICENAME.config.enabled=0
+			/sbin/uci commit $SERVICENAME
+			/etc/init.d/$SERVICENAME stop
+			exit 0
+		;;
+
+		*)
+			echo "$2 command is not supported"
+			exit 1
+		;;
+	esac
+else
+	echo "Service: $1 is not yet supported"
+	exit 1
+fi

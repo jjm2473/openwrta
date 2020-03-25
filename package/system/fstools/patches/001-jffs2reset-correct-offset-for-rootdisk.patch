@@ -1,0 +1,42 @@
+Index: fstools-2018-04-16-e2436836/jffs2reset.c
+===================================================================
+--- fstools-2018-04-16-e2436836.orig/jffs2reset.c
++++ fstools-2018-04-16-e2436836/jffs2reset.c
+@@ -11,6 +11,8 @@
+  * GNU General Public License for more details.
+  */
+ 
++#define _FILE_OFFSET_BITS 64
++
+ #include <sys/mount.h>
+ #include <sys/types.h>
+ #include <sys/stat.h>
+@@ -68,6 +70,7 @@ static int jffs2_reset(struct volume *v,
+ 
+ static int jffs2_mark(struct volume *v)
+ {
++	off_t offset = 0;
+ 	__u32 deadc0de = __cpu_to_be32(0xdeadc0de);
+ 	size_t sz;
+ 	int fd;
+@@ -79,6 +82,20 @@ static int jffs2_mark(struct volume *v)
+ 		return -1;
+ 	}
+ 
++	if (BLOCKDEV == v->type) {
++		switch (v->drv->identify(v)) {
++		case FS_F2FS:
++			offset = 0x400;
++			break;
++		case FS_EXT4:
++			offset = 0x438;
++			break;
++		default:
++			break;
++		}
++		lseek(fd, offset, SEEK_SET);
++	}
++
+ 	sz = write(fd, &deadc0de, sizeof(deadc0de));
+ 	close(fd);
+ 
