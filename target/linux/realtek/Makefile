@@ -14,7 +14,7 @@ FEATURES:=usb usbgadget gpio fpu squashfs
 MAINTAINER:=JJm2473 <jjm2473@gmail.com>
 SUBTARGETS:=rtd129x
 
-KERNEL_PATCHVER:=4.19
+KERNEL_PATCHVER:=4.14
 KERNEL_TESTING_PATCHVER=5.4
 
 define Target/Description
