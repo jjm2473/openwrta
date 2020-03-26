@@ -7,14 +7,32 @@
 include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/image.mk
 
-define Image/Build/ota/squashfs
-	./android/mkota.sh $(BIN_DIR)/$(IMG_ROOTFS)-squashfs.img $(BIN_DIR)/$(IMG_ROOTFS).ota.zip
+define Build/realtek-ota
+	./android/mkota.sh $(IMAGE_ROOTFS) $@
 endef
 
-define Image/Build
-	$(call Image/Build/$(1))
-	$(CP) $(KDIR)/root.$(1) $(BIN_DIR)/$(IMG_ROOTFS)-$(1).img
-	$(call Image/Build/ota/$(1))
+ifeq ($(SUBTARGET),rtd129x)
+
+define Device/Default
+	PROFILES = $$(DEVICE_NAME)
+	IMAGE_NAME = $$(IMAGE_PREFIX)-$$(1).$$(2)
+	FILESYSTEMS := squashfs
+	IMAGES := ota.zip
+	IMAGE/ota.zip := realtek-ota
 endef
+
+define Device/zidoo-x9s
+	PROFILES = zidoo-x9s
+	DEVICE_PACKAGES := rtk-init rtk-android-rootfs rtk-android-kmods rtk-android-xubus
+endef
+TARGET_DEVICES += zidoo-x9s
+
+define Device/zidoo-z9s
+	PROFILES = zidoo-z9s
+	DEVICE_PACKAGES := rtk-init rtk-android-rootfs rtk-android-kmods rtk-android-xubus
+endef
+TARGET_DEVICES += zidoo-z9s
+
+endif
 
 $(eval $(call BuildImage))
