@@ -14,7 +14,7 @@ endef
 ifeq ($(SUBTARGET),rtd129x)
 
 define Device/Default
-	KERNEL_NAME = vmlinux
+	KERNEL := kernel-bin
 	PROFILES = $$(DEVICE_NAME)
 	IMAGE_NAME = $$(IMAGE_PREFIX)-$$(1).$$(2)
 	FILESYSTEMS := squashfs
