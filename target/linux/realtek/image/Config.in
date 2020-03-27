@@ -93,7 +93,8 @@ menuconfig RTK_NAS_PACKAGES
 		depends on RTK_NAS_PACKAGES
 		default y
 		select PACKAGE_mdadm
-		select PACKAGE_luci-app-diskmanager if RTK_NAS_LUCI
+		select PACKAGE_luci-app-diskman_INCLUDE_mdadm if RTK_NAS_LUCI
+		select PACKAGE_luci-app-diskman if RTK_NAS_LUCI
 		help
 		  Enalbe RAID support with disk management on web UI.
 
