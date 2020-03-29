@@ -70,11 +70,6 @@ int main(int argc, char **argv, char **envp) {
                 waitpid(cid, sp58, 0);
                 exit(0);
             }
-        } else if (cpid < 0) { //0x400f98
-            // fork failed
-            //0x400f9c : movn w0, 0
-            //b 0x4012c8
-            return 0;
         } else {
             // android init
             // 0x400fa4
@@ -178,7 +173,7 @@ int main(int argc, char **argv, char **envp) {
             }
 
             // 0x004012a0
-            unshare(0x200);
+            unshare(CLONE_NEWNS|CLONE_NEWUTS);
             chroot(".");
             exec_cmd = "/init";
             //return execv("/init", ["/init"]); // 0x4012bc
