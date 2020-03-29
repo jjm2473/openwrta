@@ -31,6 +31,9 @@ if echo "$SERVICES" | grep -q $1; then
 			exit 1
 		;;
 	esac
+	if echo " samba afpd vsftpd minidlna " | grep -q " $SERVICENAME "; then
+		/etc/init.d/$SERVICENAME $2
+	fi
 else
 	echo "Service: $1 is not yet supported"
 	exit 1
