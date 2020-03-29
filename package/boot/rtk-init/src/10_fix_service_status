@@ -16,6 +16,7 @@ for service in $NO_ST_SERVICES; do
         [ -e /etc/config/$service ] || touch /etc/config/$service
         SECTION=$service
         [ "$SECTION" == "samba4" ] && SECTION="samba"
+        [ "$SECTION" == "afpd" ] && SECTION="netatalk"
         uci rename $service.@$SECTION[0]='config' >>/dev/null 2>&1
         uci set $service.config=$SECTION
         if /etc/init.d/$service enabled; then
