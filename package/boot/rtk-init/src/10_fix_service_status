@@ -1,0 +1,22 @@
+#!/bin/sh
+
+if [ -e /etc/config/minidlna ]; then
+    /sbin/uci set minidlna.@minidlna[0].interface='br-lan eth0 wlan0'
+    /sbin/uci commit minidlna
+fi
+
+NO_ST_SERVICES="samba afpd vsftpd minidlna"
+
+for service in $NO_ST_SERVICES; do
+    [ -e /etc/config/$service ] || touch /etc/config/$service
+    uci rename $service.@$service[0]='config' >>/dev/null 2>&1
+    uci set $service.config=$service
+    if [ -e /etc/init.d/$service ] && /etc/init.d/$service enabled; then
+        /sbin/uci set $service.config.enabled=1
+    else
+        /sbin/uci set $service.config.enabled=0
+    fi
+    /sbin/uci commit $service
+done
+
+exit 0

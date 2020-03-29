@@ -46,6 +46,7 @@ define Package/rtk-init/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/init $(1)/etc/
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/android.init $(1)/etc/init.d/android
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/10_disable_dnsmasq $(1)/etc/uci-defaults/
+	$(INSTALL_BIN) $(PKG_BUILD_DIR)/10_fix_service_status $(1)/etc/uci-defaults/
 endef
 
 $(eval $(call BuildPackage,rtk-init))
