@@ -1,0 +1,5 @@
+config wifi-device 'wlan0'
+	option type 'mac80211'
+
+config wifi-iface 'default_wlan0'
+	option device 'wlan0'
