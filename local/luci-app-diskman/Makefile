@@ -56,6 +56,7 @@ endef
 
 define Build/Prepare
 	tar -xzvf $(DL_DIR)/$(PKG_SOURCE) -C $(BUILD_DIR)
+	$(Build/Patch)
 endef
 
 define Build/Compile
