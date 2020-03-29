@@ -11,6 +11,7 @@ fi
 if echo "$SERVICES" | grep -q $1; then
 	SERVICENAME=$1
 	[ "$SERVICENAME" == "netatalk" ] && SERVICENAME="afpd"
+	[ "$SERVICENAME" == "samba" -a ! -f /etc/init.d/samba ] && SERVICENAME="samba4"
 	case "$2" in
 		enable)
 			/sbin/uci set $SERVICENAME.config.enabled=1
@@ -31,7 +32,7 @@ if echo "$SERVICES" | grep -q $1; then
 			exit 1
 		;;
 	esac
-	if echo " samba afpd vsftpd minidlna " | grep -q " $SERVICENAME "; then
+	if echo " samba samba4 afpd vsftpd minidlna " | grep -q " $SERVICENAME "; then
 		/etc/init.d/$SERVICENAME $2
 	fi
 else
