@@ -21,7 +21,11 @@
 #include <sys/wait.h>
 #include <sched.h> // setns
 
+#include <grp.h> // setgroups
+
 #include "cmdline.h"
+
+#include "android_filesystem_config.h"
 
 #define ANDROID_ROOT "/android"
 #define ANDROID_VIFACE "veth1"
@@ -30,6 +34,9 @@
 #define ANDROID_NET_NS "androidnet"
 
 #define OPENWRT_INIT "/etc/preinit"
+
+const gid_t ROOT_GROUPS[] = {AID_ROOT, AID_DHCP, AID_SDCARD_RW, AID_MDNSR, AID_MEDIA_RW, AID_SHELL, AID_CACHE, 
+                            AID_NET_BT_ADMIN, AID_NET_BT, AID_INET, AID_NET_RAW, AID_NET_ADMIN, AID_NET_BW_STATS, AID_NET_BW_ACCT};
 
 int main(int argc, char **argv, char **envp) {
     #define EXEC(pre, cmd) argv[0] = cmd;\
@@ -59,6 +66,8 @@ int main(int argc, char **argv, char **envp) {
             // openwrt init
             // 0x400f54
             setsid();
+            // assign permission from android
+            setgroups(sizeof(ROOT_GROUPS)/sizeof(gid_t), ROOT_GROUPS);
             unshare(CLONE_NEWPID); //movz w0, 0x2000, lsl 16
             pid_t cid = fork();//0x400f60
             if (cid == 0) {//0x400f64
