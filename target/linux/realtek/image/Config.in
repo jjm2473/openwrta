@@ -7,6 +7,7 @@ menuconfig RTK_ANDROID
 	select PACKAGE_rtk-android-kmods
 	select PACKAGE_rtk-android-xubus
 	select PACKAGE_kmod-fs-ext4
+	select PACKAGE_ip-full
 
 	config RTK_ANDROID_VERSION
 		string "Android rootfs version"
