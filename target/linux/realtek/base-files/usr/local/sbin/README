@@ -1,0 +1,8 @@
+All chk*fs and mk*fs utilities inside the archive are actually hardlinks to `ufsd' utility.
+In order to make sure that the files are not taking unnecessary space,
+it is advised to unpack the archive on the target platform, or create hardlinks to `ufsd' manually.
+You may also use symlinks to achieve the identical functionality,
+or pass utility name as an argument to `ufsd', similar to how `busybox' operates.
+
+Functionality of the provided utilities is described in `Implementation guide'.
+

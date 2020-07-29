@@ -1,0 +1,131 @@
+#!/bin/sh
+# use blkid instead of block, for block not detect ntfs partion
+
+[ -z "$1" ] && {
+	echo 'no device path' >&2
+	exit 1
+}
+
+enabled=1
+[ "$2" == "0" ] && enabled=0
+mount=0
+[ "$2" == "2" ] && mount=1
+
+enabled_swap=1
+[ "$3" == "0" ] && enabled_swap=0
+mount_swap=0
+[ "$3" == "2" ] && mount_swap=1
+
+set_fstab() {
+
+	my_fstype=`blkid /dev/${device} | awk -F " TYPE=" '{print $2}'| awk -F "\"" '{print $2}'`
+	
+	[ -n "$my_fstype" ] && {
+		logger -t Auto-Mount "New block.File system:${my_fstype}"
+		if [ "$my_fstype" = 'swap' ]; then
+			
+			n=$(uci show fstab | grep "fstab.@swap" | grep -c "=swap")
+			
+			[ $n -gt 0 ] && {
+				for i in $(seq 0 $n)
+				do
+					old_swap="$(uci get fstab.@swap[$i].device)"
+					[ "$old_swap" = "/dev/$device" ] && {
+						FLAG="SKIP"
+						break
+					}
+				done
+			}
+
+			[ "$FLAG" == "SKIP" ] && return 1
+
+			echo "config swap"
+			echo -e "\toption enabled '$enabled_swap'"
+			echo -e "\toption device '/dev/$device'"
+			echo 
+
+			[ "$mount_swap" == "1" ] && {
+				swapon /dev/$device
+			}
+
+		else # no swap
+
+			case "$my_fstype" in
+				hfs*)
+					my_fstype="ufsd";;
+				'ntfs')
+					my_fstype="ufsd";;
+				'exfat')
+					my_fstype="ufsd";;
+			esac
+
+			options=""
+
+			case "$my_fstype" in
+				ext*)
+					options="noatime";;
+				btrfs)
+					options="noatime";;
+				ufsd)
+					options="force,nls=utf8,uid=1023,gid=1023,umask=0007,noatime,user_xattr=1";;
+				'vfat')
+					options="utf8,uid=1023,gid=1023,dmask=0007,fmask=0007,shortname=mixed";;
+                *)
+                	enabled=0;;
+			esac
+
+			section=$(echo $get_uuid | sed 's/-//g')
+
+			echo "config mount '${section}'"
+			echo -e "\toption enabled '$enabled'"
+			echo -e "\toption device '/dev/$device'"
+			echo -e "\toption target '/mnt/$device'"
+			echo -e "\toption fstype '$my_fstype'"
+			[ -n "$options" ] && echo -e "\toption options '$options'"
+			echo 
+
+			[ "$mount" == "1" -a "$enabled" == "1" ] && {
+				[ -d "/mnt/${device}" ] || mkdir -p "/mnt/${device}"
+
+				cmd="mount"
+				[ -n "$my_fstype" ] && cmd="$cmd -t $my_fstype"
+				[ -n "$options" ] && cmd="$cmd -o $options"
+				cmd="$cmd /dev/$device /mnt/${device}"
+
+				$cmd
+			}
+		fi
+		return 0
+	}
+	return 1
+}
+
+device=`basename "$1"`
+
+if [ "$device" != "block" ]; then
+	[ -b /dev/${device} ] || return 1
+
+	blkinfo=`blkid "/dev/${device}"`
+	[ -z "$blkinfo" ] && return 1
+
+	# Ignore nasroot(squashfs) and nasetc
+	echo "$blkinfo" | grep -q ' TYPE="squashfs"' && return 1
+	echo "$blkinfo" | grep -q ' LABEL="nasetc"' && return 1
+	echo "$blkinfo" | grep -q ' LABEL="rootfs_data"' && return 1
+
+	get_uuid=`echo "$blkinfo" | awk -F " UUID=" '{print $2}'| awk -F "\"" '{print $2}'`
+	[ -n "$get_uuid" ] && {
+		logger -t Auto-Mount "Block /dev/${device} added."
+		logger -t Auto-Mount "UUID=$get_uuid"
+		/usr/sbin/blockdev --setra 16384 /dev/${device}
+		have_uuid=$(uci show fstab | grep -cF "$get_uuid")
+		[ "$have_uuid" = "0" ] && {
+			# uuid未配置
+			section=$(echo $get_uuid | sed 's/-//g')
+			uci get "fstab.$section" 2>>/dev/null >>/dev/null && return 1
+			set_fstab && return 0
+		}
+	}
+fi
+
+return 1

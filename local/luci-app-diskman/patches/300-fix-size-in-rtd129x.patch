@@ -1,0 +1,39 @@
+diff --git a/luasrc/model/diskman.lua b/luasrc/model/diskman.lua
+index ffae464..03c9c72 100755
+--- a/luasrc/model/diskman.lua
++++ b/luasrc/model/diskman.lua
+@@ -216,34 +216,6 @@ local get_parted_info = function(device)
+       table.insert(partitions_temp, partition_temp)
+     end
+   end
+-  if disk_temp["p_table"] == "MBR" then
+-    for i, p in ipairs(partitions_temp) do
+-      if disk_temp["extended_partition_index"] and p["number"] > 4 then
+-        if tonumber(p["sec_end"]) <= tonumber(partitions_temp[disk_temp["extended_partition_index"]]["sec_end"]) and tonumber(p["sec_start"]) >= tonumber(partitions_temp[disk_temp["extended_partition_index"]]["sec_start"]) then
+-          p["type"] = "logical"
+-          table.insert(partitions_temp[disk_temp["extended_partition_index"]]["logicals"], i)
+-        end
+-      elseif (p["number"] < 4) and (p["number"] > 0) then
+-        local s = nixio.fs.readfile("/sys/block/"..device.."/"..p["name"].."/size")
+-        if s then
+-          local real_size_sec = tonumber(s) * tonumber(disk_temp.phy_sec)
+-          -- if size not equal, it's an extended
+-          if real_size_sec ~= p["size"] then
+-            disk_temp["extended_partition_index"] = i
+-            p["type"] = "extended"
+-            p["size"] = real_size_sec
+-            p["fs"] = "-"
+-            p["logicals"] = {}
+-          else
+-            p["type"] = "primary"
+-          end
+-        else
+-          -- if not found in "/sys/block"
+-          p["type"] = "primary"
+-        end
+-      end
+-    end
+-  end
+   result = disk_temp
+   result.partitions = partitions_temp
+ 

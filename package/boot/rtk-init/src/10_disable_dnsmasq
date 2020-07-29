@@ -1,0 +1,8 @@
+#!/bin/sh
+
+[ -f /etc/init.d/dnsmasq ] && (
+    /etc/init.d/dnsmasq stop
+    /etc/init.d/dnsmasq disable
+)
+
+exit 0

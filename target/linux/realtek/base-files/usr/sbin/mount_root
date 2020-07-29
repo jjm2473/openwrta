@@ -1,0 +1,31 @@
+#!/bin/sh
+# Copyright (C) 2010 OpenWrt.org
+
+do_mount_overlayfs() {
+    if [ -e /rom/note ]; then
+        DEV_ETC=`blkid -L nasetc`
+        if [ -n "$DEV_ETC" ]; then
+            fsck -t ext4 -y $DEV_ETC || \
+                fsck.ext4 -y $DEV_ETC
+            resize2fs $DEV_ETC
+            sync
+            mount -t ext4 $DEV_ETC /overlay || return -1
+        fi
+
+        mkdir -p /overlay/upper /overlay/work
+        mount -o noatime,lowerdir=/,upperdir=/overlay/upper,workdir=/overlay/work -t overlay "overlayfs:/overlay" /mnt \
+            || return -1
+
+        # pivot
+        mount --move /proc /mnt/proc
+
+        pivot_root /mnt /mnt/rom || return -1
+
+        mount --move /rom/dev /dev
+        mount --move /rom/tmp /tmp
+        mount --move /rom/sys /sys
+        mount --move /rom/overlay /overlay
+    fi
+}
+
+[ -n "$1" ] || ( do_mount_overlayfs && exit 0 )

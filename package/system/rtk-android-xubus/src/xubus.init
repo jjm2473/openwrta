@@ -1,0 +1,17 @@
+#!/bin/sh /etc/rc.common
+# Copyright (C) 2006-2010 OpenWrt.org
+# 2019 jjm2473 porting openwrt 18.06.2+ to zidoo z9s
+
+START=00
+
+USE_PROCD=1
+PROG=/sbin/xubus
+NAME=xubus
+
+start_service()
+{
+	procd_open_instance
+	procd_set_param command "$PROG"
+	procd_set_param respawn
+	procd_close_instance
+}

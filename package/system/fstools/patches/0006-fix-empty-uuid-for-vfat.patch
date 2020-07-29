@@ -1,0 +1,59 @@
+From 97613384905afea9e83d34a1157f176c025537cc Mon Sep 17 00:00:00 2001
+From: "brian.shen" <brian.shen@realtek.com>
+Date: Mon, 28 Jan 2019 21:56:12 +0800
+Subject: [PATCH] [DEV_FIX] fix empty uuid for vfat
+
+1.Fix empty uuid for vfat from openwrt/fstool/006-fix-empty-uuid-for-vfat.patch
+---
+ libblkid-tiny/vfat.c | 15 +++++++++++++--
+ 1 file changed, 13 insertions(+), 2 deletions(-)
+
+diff --git a/libblkid-tiny/vfat.c b/libblkid-tiny/vfat.c
+index 49b865a..8ca6651 100644
+--- a/libblkid-tiny/vfat.c
++++ b/libblkid-tiny/vfat.c
+@@ -302,6 +302,7 @@ static int probe_vfat(blkid_probe pr, const struct blkid_idmag *mag)
+ {
+ 	struct vfat_super_block *vs;
+ 	struct msdos_super_block *ms;
++	char *tmp;
+ 	unsigned char *vol_label = 0;
+ 	unsigned char *vol_serno = NULL, vol_label_buf[12] = { 0 };
+ 	uint16_t sector_size = 0, reserved;
+@@ -309,11 +310,17 @@ static int probe_vfat(blkid_probe pr, const struct blkid_idmag *mag)
+ 	const char *version = NULL;
+ 	int i;
+ 
+-	ms = blkid_probe_get_sb(pr, mag, struct msdos_super_block);
++	tmp = (char *)blkid_probe_get_sb(pr, mag, struct msdos_super_block);
++	ms = malloc (sizeof(struct msdos_super_block));
++	if(tmp && ms)
++		memcpy(ms, tmp, sizeof(struct msdos_super_block));
+ 	if (!ms)
+ 		return errno ? -errno : 1;
+ 
+-	vs = blkid_probe_get_sb(pr, mag, struct vfat_super_block);
++	tmp = (char *)blkid_probe_get_sb(pr, mag, struct vfat_super_block);
++	vs = malloc (sizeof(struct vfat_super_block));
++	if(tmp && vs)
++		memcpy(vs, tmp, sizeof(struct vfat_super_block));
+ 	if (!vs)
+ 		return errno ? -errno : 1;
+ 
+@@ -432,9 +439,13 @@ static int probe_vfat(blkid_probe pr, const struct blkid_idmag *mag)
+ 	if (vol_serno)
+ 		blkid_probe_sprintf_uuid(pr, vol_serno, 4, "%02X%02X-%02X%02X",
+ 			vol_serno[3], vol_serno[2], vol_serno[1], vol_serno[0]);
++
+ 	if (version)
+ 		blkid_probe_set_version(pr, version);
+ 
++	if(ms) free(ms);
++	if(vs) free(vs);
++
+ 	return 0;
+ }
+ 
+-- 
+2.7.4
+
