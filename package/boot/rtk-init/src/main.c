@@ -92,6 +92,12 @@ int main(int argc, char **argv, char **envp) {
                 // b 0x4012c8
                 return 1;
             }
+            if (router == 0 && get_cmdline("net.switch", sp100, 0x80) != NULL && strncmp(sp100, "openwrt", 0x7) == 0) {
+                //  router mode by bootargs
+                router = 1;
+                unlink("./.ottwifi");
+                fputs("===== Router mode ===== ", stderr);
+            }
             // 0x00401010
             int debuggable = 1;
             char *cs = get_cmdline("console.switch", sp100, 0x80);
