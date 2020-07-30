@@ -41,15 +41,17 @@ endef
 
 define Package/transmission-web-control-over/postinst
 #!/bin/sh
-[ -f /usr/share/transmission/web/index.original.html ] || mv /usr/share/transmission/web/index.html /usr/share/transmission/web/index.original.html
-[ -f /usr/share/transmission/web/index.html ] && rm -f /usr/share/transmission/web/index.html
-mv /usr/share/transmission/web/index.new.html /usr/share/transmission/web/index.html
+cd $${IPKG_INSTROOT}/usr/share/transmission/web
+[ -f index.original.html ] || mv index.html index.original.html
+[ -f index.html ] && rm -f index.html
+mv index.new.html index.html
 endef
 
 define Package/transmission-web-control-over/prerm
 #!/bin/sh
-mv /usr/share/transmission/web/index.html /usr/share/transmission/web/index.new.html
-mv /usr/share/transmission/web/index.original.html /usr/share/transmission/web/index.html
+cd $${IPKG_INSTROOT}/usr/share/transmission/web
+mv index.html index.new.html
+mv index.original.html index.html
 endef
 
 $(eval $(call BuildPackage,transmission-web-control-over))
