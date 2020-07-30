@@ -42,10 +42,10 @@ struct Args
 };
 
 /**
- * 
+ * Callback protocol type
  * return 1 if should free context
  **/
-typedef int (*Callback)(int epollfd, struct Args *ctx);
+typedef int (*Callback)(int epollfd, struct Args *args);
 
 struct Context
 {
@@ -53,6 +53,9 @@ struct Context
     struct Args args;
 };
 
+/**
+ * return 0 on success, -1 on EOF, -2 on other errors.
+ */
 int doforward(int from, int to)
 {
     static char data[BUFF_LEN]; // we are running in single thread
@@ -110,13 +113,13 @@ int doCpoy(int epollfd, struct Args *args) // Callback
         // something wrong or both peer closed
         perror("destroy pair %d %d\n", args->fd, args->a);
         epoll_ctl(epollfd, EPOLL_CTL_DEL, args->fd, &dummy);
-        epoll_ctl(epollfd, EPOLL_CTL_DEL, args->a, &dummy);
         close(args->fd);
-        close(args->a);
         if (args->b != NULL) {
+            epoll_ctl(epollfd, EPOLL_CTL_DEL, args->a, &dummy);
             free(args->b);
             args->b = NULL;
         }
+        close(args->a);
         return 1; // let looper free context
     }
     else if (ret == -1) // peer eof
@@ -124,8 +127,8 @@ int doCpoy(int epollfd, struct Args *args) // Callback
         perror("sock eof %d\n", args->fd);
         epoll_ctl(epollfd, EPOLL_CTL_DEL, args->fd, &dummy);
 
-        shutdown(args->a, SHUT_WR);
-        ((struct Context*)(args->b))->args.b = NULL; // set flag to 1, means one peer closed
+        shutdown(args->a, SHUT_WR); // no more data write to other side
+        ((struct Context*)(args->b))->args.b = NULL; // set b of other side to NULL, means this peer closed
         return 1; // let looper free context
     }
 
@@ -181,7 +184,7 @@ int setnonblocking(int fd)
     return fcntl(fd, F_SETFL, oldflags);
 }
 
-int connTarget(struct sockaddr *cliaddr, socklen_t len)
+int connTarget(struct sockaddr *addr, socklen_t len)
 {
     int sock2 = socket(AF_LOCAL, SOCK_STREAM, 0);
     if (sock2 < 0)
@@ -189,7 +192,7 @@ int connTarget(struct sockaddr *cliaddr, socklen_t len)
         return sock2;
     }
 
-    if (connect(sock2, cliaddr, len) < 0 || setnonblocking(sock2) < 0)
+    if (connect(sock2, addr, len) < 0 || setnonblocking(sock2) < 0)
     {
         close(sock2);
         return -1;
@@ -200,10 +203,10 @@ int connTarget(struct sockaddr *cliaddr, socklen_t len)
 
 int doAccept(int epollfd, struct Args *args) // Callback
 {
-    struct sockaddr_un cliaddr;
-    socklen_t len = sizeof(cliaddr);
+    struct sockaddr_un addr;
+    socklen_t len = sizeof(addr);
     perror("accept %d\n", args->fd);
-    int sockfd = accept(args->fd, (struct sockaddr *)&cliaddr, &len);
+    int sockfd = accept(args->fd, (struct sockaddr *)&addr, &len);
     if (sockfd < 0)
     {
         return 0;
@@ -211,11 +214,12 @@ int doAccept(int epollfd, struct Args *args) // Callback
     perror("client connect %d\n", sockfd);
     if (setnonblocking(sockfd) >= 0)
     {
-        cliaddr.sun_family = AF_LOCAL;
-        strcpy(cliaddr.sun_path, TARGET_ADDR);
-        len = SUN_LEN(&cliaddr);
+        // reuse addr object
+        addr.sun_family = AF_LOCAL;
+        strcpy(addr.sun_path, TARGET_ADDR);
+        len = SUN_LEN(&addr);
 
-        int sock2 = connTarget((struct sockaddr *)&cliaddr, len);
+        int sock2 = connTarget((struct sockaddr *)&addr, len);
         if (sock2 >= 0)
         {
             if (makePair(epollfd, sockfd, sock2) < 0)
