@@ -103,6 +103,7 @@ config RTK_NAS_SMB
 	bool
 	depends on RTK_NAS_PACKAGES
 	select PACKAGE_samba36-server
+	select PACKAGE_rtk-samba-config
 	select PACKAGE_luci-app-samba if RTK_NAS_LUCI
 
 config RTK_NAS_FTP
