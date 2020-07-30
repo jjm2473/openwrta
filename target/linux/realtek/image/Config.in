@@ -86,7 +86,7 @@ menuconfig RTK_NAS_PACKAGES
 		depends on RTK_NAS_PACKAGES
 		default y
 		select PACKAGE_transmission-daemon-mbedtls
-		select PACKAGE_transmission-web
+		select PACKAGE_transmission-web-control-over
 		select PACKAGE_luci-app-transmission if RTK_NAS_LUCI
 
 	config RTK_NAS_RAID
