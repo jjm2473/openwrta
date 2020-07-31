@@ -22,7 +22,7 @@ define Package/rtk-samba-config
   CATEGORY:=Network
   TITLE:=realtek samba config
   MAINTAINER:=jjm2473 <jjm2473@gmail.com>
-  DEPENDS:=@TARGET_realtek @(PACKAGE_samba36-server||PACKAGE_samba4-server) +PACKAGE_samba36-server:samba36-server +PACKAGE_samba4-server:samba4-server
+  DEPENDS:=@TARGET_realtek @(PACKAGE_samba36-server||PACKAGE_samba4-server) @PACKAGE_samba36-server:samba36-server @PACKAGE_samba4-server:samba4-server
 endef
 
 define Package/rtk-samba-config/description
