@@ -19,6 +19,8 @@ PKG_MAINTAINER:=Felix Fietkau <nbd@nbd.name>
 
 PKG_BUILD_PARALLEL:=1
 
+TARGET_CONFIGURE_OPTS += CHECK_RUN_DIR=0
+
 include $(INCLUDE_DIR)/package.mk
 
 define Package/mdadm
