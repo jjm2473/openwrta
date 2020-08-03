@@ -341,6 +341,16 @@ ifeq ($(CONFIG_SAMBA4_SERVER_AD_DC),)
 	# unbundle iso8601
 	$(SED) '/"iso8601":/d' $(PKG_BUILD_DIR)/third_party/wscript
 endif
+ifneq ($(shell /bin/sh -c "echo -n 'X'"),X)
+	$(SED) 's,/bin/sh,/bin/bash,g' $(PKG_BUILD_DIR)/buildtools/wafsamba/samba_cross.py
+endif
+ifeq ($(HOST_OS),Darwin)
+	# cross compiling, target platform always 'linux'
+	$(SED) "s,sys.platform,'linux',g" $(PKG_BUILD_DIR)/wscript $(PKG_BUILD_DIR)/buildtools/wafsamba/wscript $(PKG_BUILD_DIR)/source3/wscript $(PKG_BUILD_DIR)/ctdb/wscript $(PKG_BUILD_DIR)/lib/util/wscript_configure $(PKG_BUILD_DIR)/third_party/uid_wrapper/wscript
+	# don't add -L/usr/local/lib flag
+	# $(SED) "s,SYSTEM_LIB_PATHS = ,SYSTEM_LIB_PATHS = [] #,g" $(PKG_BUILD_DIR)/third_party/waf/waflib/Tools/ccroot.py
+	$(SED) "s,additional_dirs.append,pass #,g" $(PKG_BUILD_DIR)/buildtools/wafsamba/samba_waf18.py
+endif
 endef
 
 define Build/Configure
