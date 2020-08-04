@@ -71,8 +71,10 @@ jobs:
 
     - name: Overwrite
       run: |
-        [ -e overwrite ] && (tar -c -C overwrite . | tar -x -C openwrt;)
-        [ -e openwrt/feeds/luci/applications/luci-app-samba4/Makefile ] || (echo 'failed!'; exit -1;)
+        [ -e overwrite ] && (tar -c -C overwrite . | tar -x -C openwrt)
+
+    - name: Update feeds index
+      run: cd openwrt && ./scripts/feeds update -ai
 
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
