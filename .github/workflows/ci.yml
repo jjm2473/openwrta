@@ -41,7 +41,9 @@ jobs:
 
     - name: Bump config
       run: |
-        mv openwrt/.github/workflows/* ./
+        tar -c -C openwrt/.github/workflows . | tar -x
+        ls ./
+        rm -rf openwrt/.github/workflows
 
     - name: Initialization environment
       env:
@@ -69,7 +71,8 @@ jobs:
 
     - name: Overwrite
       run: |
-        [ -e overwrite ] && (tar -c -C overwrite . | tar -x -C openwrt)
+        [ -e overwrite ] && (tar -c -C overwrite . | tar -x -C openwrt;)
+        [ -e openwrt/feeds/luci/applications/luci-app-samba4/Makefile ] || (echo 'failed!'; exit -1;)
 
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
