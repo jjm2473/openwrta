@@ -9,7 +9,3 @@ config interface 'lan'
 	option ifname 'eth0'
 	option force_link '1'
 
-config interface 'wlan0'
-	option proto 'dhcp'
-	option ifname 'wlan0'
-	option force_link '1'
