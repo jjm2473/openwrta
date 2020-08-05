@@ -34,6 +34,8 @@ define Device/zidoo-z9s
 endef
 TARGET_DEVICES += zidoo-z9s
 
+SQUASHFSCOMP := xz
+
 endif
 
 $(eval $(call BuildImage))
