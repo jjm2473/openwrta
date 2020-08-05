@@ -5,16 +5,11 @@ config interface loopback
 	option netmask	255.0.0.0
 
 config interface 'lan'
-	option ifname 'eth0'
-	option proto 'static'
-	option ipaddr '192.168.1.1'
-	option netmask '255.255.255.0'
-	option auto '0'
-
-config interface 'lan_dhcp'
 	option proto 'dhcp'
 	option ifname 'eth0'
+	option force_link '1'
 
 config interface 'wlan0'
 	option proto 'dhcp'
 	option ifname 'wlan0'
+	option force_link '1'

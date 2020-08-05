@@ -1,0 +1,16 @@
+#!/bin/sh /etc/rc.common
+
+START=21
+USE_PROCD=1
+
+start_service() {
+	procd_open_instance
+	procd_set_param command "/sbin/udhcpc"
+	procd_append_param command -s /lib/netifd/dns.script -f -t 0 -i wlan0 -x hostname:$HOSTNAME -C
+	procd_set_param respawn 3600 5 0
+	procd_close_instance
+}
+
+service_triggers() {
+	procd_add_reload_trigger "system"
+}
