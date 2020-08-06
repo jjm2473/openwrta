@@ -22,6 +22,7 @@ setup_interface () {
 
 deconfig_interface() {
 	# echo >/tmp/resolv.conf.auto
+	return 0
 }
 
 case "$1" in

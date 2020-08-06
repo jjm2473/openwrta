@@ -8,6 +8,7 @@ start_service() {
 	procd_set_param command "/sbin/udhcpc"
 	procd_append_param command -s /lib/netifd/dns.script -f -t 0 -i wlan0 -x hostname:$HOSTNAME -C
 	procd_set_param respawn 3600 5 0
+	procd_set_param env INTERFACE=wlan0
 	procd_close_instance
 }
 
