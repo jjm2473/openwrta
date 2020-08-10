@@ -7,8 +7,9 @@ PID=/var/run/forked-daapd.pid
 SSD=start-stop-daemon
 
 start() {
+        rm -rf /var/cache/forked-daapd
         mkdir -p /var/cache/forked-daapd
-        chown -R daapd /var/cache/forked-daapd
+        chown -R daapd:aid_inet /var/cache/forked-daapd
         $SSD -p $PID -S -x $BIN -- -P $PID
 }
 
