@@ -7,4 +7,12 @@ boot() {
 	# notify android continue
 	touch /android/.coldplug_done
 	touch /rom/android/.coldplug_done
+
+	# wait wifi
+	for i in `seq 1 30`; do
+		if [ -d /sys/class/ieee80211/phy0 ]; then
+			break
+		fi
+		sleep 1
+	done
 }

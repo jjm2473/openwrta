@@ -1,5 +1,6 @@
 config wifi-device 'radio0'
 	option type 'none'
+	option phy 'phy0'
 	option path 'platform/98010c00.sdio/mmc_host/mmc0/mmc0:0001/mmc0:0001:1'
 	option hwmode '11n'
 	option channel 'auto'

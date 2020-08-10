@@ -162,12 +162,6 @@ none_setup_vif() {
 	json_get_vars mode
 	json_get_var vif_txpower txpower
 
-	ip link set dev "$ifname" up || {
-		wireless_setup_vif_failed IFUP_ERROR
-		json_select ..
-		return
-	}
-
 	set_default vif_txpower "$txpower"
 
 	case "$mode" in
