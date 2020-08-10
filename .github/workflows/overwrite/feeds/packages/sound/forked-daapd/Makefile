@@ -35,7 +35,7 @@ DEPENDS:=+libgpg-error +libgcrypt +libgdbm +zlib +libexpat +libunistring \
 	+libevent2 +libdaemon +libantlr3c +confuse +alsa-lib +libffmpeg-full \
 	+mxml +libavahi-client +sqlite3-cli +libplist +libcurl +libjson-c \
 	+libprotobuf-c +libgnutls +libsodium +libwebsockets $(ICONV_DEPENDS)
-USERID:=daapd=190:aid_inet=3003
+USERID:=daapd=190:aid_inet=3003 daapd=190:media_rw=1023
 endef
 
 define Package/forked-daapd/description

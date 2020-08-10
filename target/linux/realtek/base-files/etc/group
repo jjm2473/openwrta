@@ -18,4 +18,4 @@ aid_shell:x:2000:root
 aid_inet:x:3003:root,nobody,network,ftp,transmission,aria2,minidlna,avahi
 aid_net_raw:x:3004:root,avahi
 aid_net_admin:x:3005:root
-media_rw:x:1023:root,nobody,ftp,transmission,aria2,minidlna
+media_rw:x:1023:root,nobody,ftp,transmission,aria2,minidlna,daapd
