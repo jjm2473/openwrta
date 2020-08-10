@@ -76,7 +76,7 @@ define Package/forked-daapd/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/forked-daapd.init $(1)/etc/init.d/forked-daapd
 	$(INSTALL_DIR) $(1)/usr/share/forked-daapd
-	$(INSTALL_BIN) $(PKG_INSTALL_DIR)/usr/share/forked-daapd/htdocs $(1)/usr/share/forked-daapd/
+	$(CP) $(PKG_INSTALL_DIR)/usr/share/forked-daapd/htdocs $(1)/usr/share/forked-daapd/
 endef
 
 $(eval $(call BuildPackage,forked-daapd))
