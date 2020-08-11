@@ -56,6 +56,7 @@ menuconfig RTK_NAS_PACKAGES
 			select RTK_NAS_FTP
 			select RTK_NAS_AFP
 			select RTK_NAS_DLNA
+			select RTK_NAS_DAAP
 			help
 			  All file transfer(SMB/FTP/AFP) and streaming(DLNA/DAAP) services.
 
