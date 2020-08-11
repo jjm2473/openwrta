@@ -14,7 +14,13 @@ set_classless_routes() {
 }
 
 setup_interface () {
-	ipmask=$(ifconfig $INTERFACE | awk '
+	for i in `seq 1 12`; do
+		sleep 1
+		if ifconfig $interface | grep -q 'inet addr:'; then
+			break
+		fi
+	done
+	ipmask=$(ifconfig $interface | awk '
 		/inet addr:/ {	# Filter IPv4
 		#   inet addr:192.168.1.1  Bcast:192.168.1.255  Mask:255.255.255.0
 		$1="";		# remove inet
@@ -106,6 +112,7 @@ setup_interface () {
 
 deconfig_interface() {
 	proto_init_update "*" 0
+	proto_set_keep 1
 	proto_send_update "$INTERFACE"
 }
 
