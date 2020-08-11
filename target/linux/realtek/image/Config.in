@@ -8,6 +8,7 @@ menuconfig RTK_ANDROID
 	select PACKAGE_rtk-android-xubus
 	select PACKAGE_kmod-fs-ext4
 	select PACKAGE_ip-full
+	select PACKAGE_dhcp-dns
 
 	config RTK_ANDROID_VERSION
 		string "Android rootfs version"
@@ -38,6 +39,7 @@ menuconfig RTK_NAS_PACKAGES
 		select PACKAGE_luci
 		select LUCI_LANG_zh-cn
 		select PACKAGE_luci-theme-material
+		select PACKAGE_luci-proto-dns
 		help
 		  Enalbe Luci
 

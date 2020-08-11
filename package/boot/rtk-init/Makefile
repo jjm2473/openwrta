@@ -8,7 +8,7 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=rtk-init
-PKG_RELEASE:=1.0
+PKG_RELEASE:=1
 PKG_LICENSE:=CC0-1.0
 PKG_MAINTAINER:=jjm2473 <jjm2473@gmail.com>
 
