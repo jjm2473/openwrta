@@ -29,6 +29,7 @@ define Package/rpcbind
   TITLE:=Universal addresses to RPC mapper
   URL:=http://rpcbind.sourceforge.net/
   USERID:=rpc=65533:rpc=65533
+  CONFLICTS:=portmap
 endef
 
 define Package/rpcbind/description
