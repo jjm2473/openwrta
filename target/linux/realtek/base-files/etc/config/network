@@ -6,7 +6,7 @@ config interface loopback
 
 config interface 'lan'
 	option ifname 'eth0'
-	option proto 'dhcp'
+	option proto 'dns'
 
 config interface 'wlan'
-	option proto 'dhcp'
+	option proto 'dns'
