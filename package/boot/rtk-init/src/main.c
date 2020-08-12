@@ -69,6 +69,7 @@ int main(int argc, char **argv, char **envp) {
             // 0x400f54
             setsid();
             // assign permission from android
+            setenv("ANDROID", "1", 1);
             setgroups(sizeof(ROOT_GROUPS)/sizeof(gid_t), ROOT_GROUPS);
             unshare(CLONE_NEWPID); //movz w0, 0x2000, lsl 16
             pid_t cid = fork();//0x400f60
