@@ -1,12 +1,13 @@
 --- a/src/linux/setgroups.c
 +++ b/src/linux/setgroups.c
-@@ -1,8 +1,27 @@
+@@ -1,8 +1,41 @@
  #define _GNU_SOURCE
  #include <unistd.h>
  #include "syscall.h"
 +#include "stdlib.h"
 +#include "android_filesystem_config.h"
 +
++// ordered
 +static const gid_t MIN_GROUPS[] = {AID_DHCP, AID_SDCARD_RW, AID_MDNSR, AID_MEDIA_RW, AID_SDCARD_R,
 +								AID_NET_BT_ADMIN, AID_NET_BT, AID_INET, AID_NET_RAW, AID_NET_BW_STATS, 
 +								AID_READPROC};
@@ -19,14 +20,27 @@
 +		return syscall(SYS_setgroups, count, list);
 +	} else {
 +		gid_t merged[count + MIN_GROUPS_LEN];
-+		size_t i;
-+		for (i=0; i<count; ++i) {
-+			merged[i] = list[i];
-+		}
++		gid_t cur;
++		size_t i,j;
++		gid_t *p = merged;
 +		for (i=0; i<MIN_GROUPS_LEN; ++i) {
-+			merged[i + count] = MIN_GROUPS[i];
++			*p++ = MIN_GROUPS[i];
 +		}
-+		return syscall(SYS_setgroups, count + MIN_GROUPS_LEN, merged);
++		for (i=0; i<count; ++i) {
++			cur = list[i];
++			for (j=0; j<MIN_GROUPS_LEN; ++j) {
++				if (cur == MIN_GROUPS[j]) {
++					break;
++				} else if (cur > MIN_GROUPS[j]) {
++					j = MIN_GROUPS_LEN;
++					break;
++				}
++			}
++			if (MIN_GROUPS_LEN == j) {
++				*p++ = cur;
++			}
++		}
++		return syscall(SYS_setgroups, p - merged, merged);
 +	}
  }
 --- /dev/null
