@@ -20,4 +20,4 @@ aid_net_raw:x:3004:
 aid_net_admin:x:3005:root
 aid_net_bw_stats:x:3006:
 aid_readproc:x:3009:
-media_rw:x:1023:
+media_rw:x:1023:nobody

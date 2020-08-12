@@ -31,7 +31,7 @@
 +			for (j=0; j<MIN_GROUPS_LEN; ++j) {
 +				if (cur == MIN_GROUPS[j]) {
 +					break;
-+				} else if (cur > MIN_GROUPS[j]) {
++				} else if (cur < MIN_GROUPS[j]) {
 +					j = MIN_GROUPS_LEN;
 +					break;
 +				}
