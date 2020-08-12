@@ -1,0 +1,1 @@
+export ANDROID=1
