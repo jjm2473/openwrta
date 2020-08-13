@@ -1,0 +1,5 @@
+config forked-daapd 'config'
+	option enabled		'0'
+	option path		'/mnt'
+	option name		'%h - iTunes/DAAP'
+	option db_path		'/var/cache/forked-daapd/songs3.db'

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+uci -q batch <<-EOF >/dev/null
+	delete ucitrack.forked-daapd
+	set ucitrack.forked-daapd=forked-daapd
+	set ucitrack.forked-daapd.init=forked-daapd
+	commit ucitrack
+EOF
+
+rm -f /tmp/luci-indexcache
+exit 0

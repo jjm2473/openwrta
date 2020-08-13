@@ -6,13 +6,51 @@ BIN=/usr/sbin/forked-daapd
 PID=/var/run/forked-daapd.pid
 SSD=start-stop-daemon
 
+DAAPD_CONF='/etc/forked-daapd.conf'
+
+start_instance() {
+    local enabled
+    local name
+    local path
+    local db_path
+    local dirpath
+
+    config_get enabled $1 enabled
+    config_get name $1 name
+    config_get path $1 path
+    config_get db_path $1 db_path
+
+    sed -i '/directories =/c\	directories = "'$path'"' $DAAPD_CONF
+    sed -i '/db_path =/c\	db_path = "'$db_path'"' $DAAPD_CONF
+    name=${name// /\\\\s}
+    sed -i '/^[^#].*name =/c\	name = "'$name'"' $DAAPD_CONF
+    sed -i 's/\\s/ /g' $DAAPD_CONF
+
+    dirpath=`dirname $db_path`
+
+    if [ ! -d "$dirpath" ]; then
+       mkdir -m 755 $dirpath
+       chown daapd.aid_inet $dirpath
+    fi
+
+    if [ "$enabled" -gt 0 ];then
+      # Wait process finish up to 5 seconds
+      counter=0 limit=5
+      while [ "$counter" -lt "$limit" ]; do
+        [ -f $PID ] && kill -0 `cat $PID` 2>/dev/null || break
+        sleep 1
+      done
+      $SSD -p $PID -S -x $BIN -- -P $PID
+    else
+      stop
+    fi
+}
+
 start() {
-        rm -rf /var/cache/forked-daapd
-        mkdir -p /var/cache/forked-daapd
-        chown -R daapd:aid_inet /var/cache/forked-daapd
-        $SSD -p $PID -S -x $BIN -- -P $PID
+    config_load forked-daapd
+    config_foreach start_instance forked-daapd
 }
 
 stop() {
-        $SSD -p $PID -K -s SIGINT
+    $SSD -p $PID -K -s SIGINT
 }

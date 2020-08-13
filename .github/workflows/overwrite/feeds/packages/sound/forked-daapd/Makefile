@@ -47,6 +47,7 @@ endef
 
 define Package/forked-daapd/conffiles
 /etc/forked-daapd.conf
+/etc/config/forked-daapd
 endef
 
 CONFIGURE_ARGS += \
@@ -77,6 +78,8 @@ define Package/forked-daapd/install
 	$(INSTALL_BIN) ./files/forked-daapd.init $(1)/etc/init.d/forked-daapd
 	$(INSTALL_DIR) $(1)/usr/share/forked-daapd
 	$(CP) $(PKG_INSTALL_DIR)/usr/share/forked-daapd/htdocs $(1)/usr/share/forked-daapd/
+	$(INSTALL_DIR) $(1)/etc/config
+	$(INSTALL_CONF) ./files/forked-daapd.uci $(1)/etc/config/forked-daapd
 endef
 
 $(eval $(call BuildPackage,forked-daapd))
