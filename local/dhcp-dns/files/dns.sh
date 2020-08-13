@@ -52,21 +52,18 @@ proto_dns_setup() {
 	[ "$broadcast" = 1 ] && broadcast="-B" || broadcast=
 	[ "$release" = 1 ] && release="-R" || release=
 	[ -n "$clientid" ] && clientid="-x 0x3d:${clientid//:/}" || clientid="-C"
-	[ -n "$iface6rd" ] && proto_export "IFACE6RD=$iface6rd"
-	[ "$iface6rd" != 0 -a -f /lib/netifd/proto/6rd.sh ] && append dhcpopts "-O 212"
-	[ -n "$zone6rd" ] && proto_export "ZONE6RD=$zone6rd"
 	[ -n "$zone" ] && proto_export "ZONE=$zone"
-	[ -n "$mtu6rd" ] && proto_export "MTU6RD=$mtu6rd"
-	[ -n "$customroutes" ] && proto_export "CUSTOMROUTES=$customroutes"
-	[ "$delegate" = "0" ] && proto_export "IFACE6RD_DELEGATE=0"
 	# Request classless route option (see RFC 3442) by default
-	[ "$classlessroute" = "0" ] || append dhcpopts "-O 121"
+	#[ "$classlessroute" = "0" ] || append dhcpopts "-O 121"
 
 	proto_export "INTERFACE=$config"
+
+	sleep 1
+
 	proto_run_command "$config" udhcpc \
 		-p /var/run/udhcpc-$iface.pid \
 		-s /lib/netifd/dns.script \
-		-f -t 0 -i "$iface" \
+		-f -t 0 -T 4 -i "$iface" \
 		${ipaddr:+-r $ipaddr} \
 		${hostname:+-x "hostname:$hostname"} \
 		${vendorid:+-V "$vendorid"} \
