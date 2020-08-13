@@ -109,8 +109,6 @@ vusers_iterate()
 
 	if ! [ -d "$home" ]; then
 		mkdir -p $home
-		chown $owner:$owner $home
-		chmod -R a+w $home
 	fi
 }
 
@@ -208,7 +206,6 @@ if [ x$anon_enable = x1 ]; then
 	output_bool anonymous others "anon_other_write_enable" 0
 
 	mkdir -p $anon_root
-	chown -R $ftp_username:$ftp_username $anon_root
 else
 	output_const "anonymous_enable" NO
 fi
