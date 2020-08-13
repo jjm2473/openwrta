@@ -19,7 +19,7 @@ msgstr ""
 
 #: applications/luci-app-samba4/luasrc/model/cbi/samba4.lua:78
 msgid "Allow guests"
-msgstr "允许匿名用户"
+msgstr "允许匿名"
 
 #: applications/luci-app-samba4/luasrc/model/cbi/samba4.lua:15
 msgid "Allow system users to reach their home directories via network shares"
@@ -31,7 +31,7 @@ msgstr "允许用户"
 
 #: applications/luci-app-samba4/luasrc/model/cbi/samba4.lua:106
 msgid "Apple Time-machine share"
-msgstr "Apple Time-machine 共享"
+msgstr "时间机器"
 
 #: applications/luci-app-samba4/luasrc/model/cbi/samba4.lua:63
 msgid "Browse-able"
@@ -39,7 +39,7 @@ msgstr "可浏览"
 
 #: applications/luci-app-samba4/luasrc/model/cbi/samba4.lua:93
 msgid "Create mask"
-msgstr "创建权限掩码"
+msgstr "文件掩码"
 
 #: applications/luci-app-samba4/luasrc/model/cbi/samba4.lua:12
 msgid "Description"
@@ -47,7 +47,7 @@ msgstr "描述"
 
 #: applications/luci-app-samba4/luasrc/model/cbi/samba4.lua:98
 msgid "Directory mask"
-msgstr "目录权限掩码"
+msgstr "目录掩码"
 
 #: applications/luci-app-samba4/luasrc/model/cbi/samba4.lua:27
 msgid "Disable Active Directory Domain Controller"
@@ -89,7 +89,7 @@ msgstr "基本设置"
 
 #: applications/luci-app-samba4/luasrc/model/cbi/samba4.lua:83
 msgid "Guests only"
-msgstr "仅来宾用户"
+msgstr "仅来宾"
 
 #: applications/luci-app-samba4/luasrc/model/cbi/samba4.lua:11
 msgid "Hostname"
@@ -142,7 +142,7 @@ msgstr ""
 
 #: applications/luci-app-samba4/luasrc/model/cbi/samba4.lua:108
 msgid "Time-machine size in GB"
-msgstr "Time-machine 大小（GB）"
+msgstr "时间机器大小（GB）"
 
 #: applications/luci-app-samba4/luasrc/model/cbi/samba4.lua:103
 msgid "Vfs objects"
