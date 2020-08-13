@@ -1,0 +1,10 @@
+#!/bin/sh
+
+for service in dnsmasq firewall; do
+    [ -f /etc/init.d/$service ] && (
+        /etc/init.d/$service disable
+        /etc/init.d/$service stop
+    )
+done
+
+exit 0

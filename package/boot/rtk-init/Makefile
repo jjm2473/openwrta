@@ -45,7 +45,7 @@ define Package/rtk-init/install
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/android.init $(1)/etc/init.d/android
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
-	$(INSTALL_BIN) ./files/10_disable_dnsmasq $(1)/etc/uci-defaults/
+	$(INSTALL_BIN) ./files/10_disable_services $(1)/etc/uci-defaults/
 	$(INSTALL_BIN) ./files/10_fix_service_status $(1)/etc/uci-defaults/
 	$(INSTALL_DIR) $(1)/etc/profile.d
 	$(INSTALL_BIN) ./files/00_rtk_android.sh $(1)/etc/profile.d/
