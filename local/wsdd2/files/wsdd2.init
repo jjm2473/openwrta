@@ -40,7 +40,7 @@ start_service() {
 
 	# resolve lan interface (BUG: No multi-interface binds atm)
 	local ifname
-	network_get_device ifname lan
+	network_get_device ifname ${INTERFACE:-lan}
 
 	local board_vendor
 	local board_model
