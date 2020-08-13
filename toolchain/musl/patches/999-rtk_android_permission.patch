@@ -16,7 +16,7 @@
  int setgroups(size_t count, const gid_t list[])
  {
 -	return syscall(SYS_setgroups, count, list);
-+	if (getenv("ANDROID") == NULL) {
++	if (getenv("ANDROID") == NULL && access("/tmp/.android", F_OK)) {
 +		return syscall(SYS_setgroups, count, list);
 +	} else {
 +		gid_t merged[count + MIN_GROUPS_LEN];

@@ -4,10 +4,15 @@
 START=01
 
 boot() {
+	[ -n "$ANDROID" ] || return
+
 	# notify android continue
 	touch /android/.coldplug_done
 	touch /rom/android/.coldplug_done
 
+	# let others know we are running with android
+	touch /tmp/.android
+	chmod 444 /tmp/.android
 	# wait wifi
 	for i in `seq 1 30`; do
 		if [ -d /sys/class/ieee80211/phy0 ]; then
