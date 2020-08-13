@@ -10,6 +10,6 @@ function index()
 
 	local page
 
-	page = entry({"admin", "NAS", "forked_daapd"}, cbi("forked_daapd"), _("iTunes"))
+	page = entry({"admin", "nas", "forked_daapd"}, cbi("forked_daapd"), _("iTunes"))
 	page.dependent = true
 end

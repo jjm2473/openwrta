@@ -33,16 +33,9 @@ start_instance() {
        chown daapd.aid_inet $dirpath
     fi
 
+    stop
     if [ "$enabled" -gt 0 ];then
-      # Wait process finish up to 5 seconds
-      counter=0 limit=5
-      while [ "$counter" -lt "$limit" ]; do
-        [ -f $PID ] && kill -0 `cat $PID` 2>/dev/null || break
-        sleep 1
-      done
       $SSD -p $PID -S -x $BIN -- -P $PID
-    else
-      stop
     fi
 }
 
@@ -52,5 +45,12 @@ start() {
 }
 
 stop() {
-    $SSD -p $PID -K -s SIGINT
+    local pidv
+    [ -f $PID ] || return
+    pidv=`cat $PID`
+    [ -n "$pidv" ] || return
+    if grep -q forked-daapd /proc/$pidv/comm; then
+        $SSD -p $PID -K -s SIGINT
+        while kill -0 $pidv 2> /dev/null; do sleep 1; done;
+    fi
 }
