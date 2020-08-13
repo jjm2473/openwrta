@@ -1,0 +1,14 @@
+#!/bin/sh
+
+uci -q batch <<-EOF >/dev/null
+	delete ucitrack.@vsftpd[-1]
+	add ucitrack vsftpd
+	set ucitrack.@vsftpd[-1].init=vsftpd-uci
+	commit ucitrack
+EOF
+
+[ -f /etc/init.d/vsftpd ] && /etc/init.d/vsftpd enabled && /etc/init.d/vsftpd disable
+/etc/init.d/vsftpd stop
+
+rm -f /tmp/luci-vsftpd
+exit 0

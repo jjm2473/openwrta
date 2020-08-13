@@ -13,6 +13,9 @@ if echo "$SERVICES" | grep -q $1; then
 	[ "$SERVICENAME" == "netatalk" ] && SERVICENAME="afpd"
 	[ "$SERVICENAME" == "samba" -a ! -f /etc/init.d/samba ] && SERVICENAME="samba4"
 
+	init=$SERVICENAME
+	[ "$init" == "vsftpd" -a -f /etc/init.d/vsftpd-uci ] && init="vsftpd-uci"
+
 	SECTION=$SERVICENAME
 	[ "$SECTION" == "samba4" ] && SECTION="samba"
 	[ "$SECTION" == "afpd" ] && SECTION="netatalk"
@@ -20,14 +23,14 @@ if echo "$SERVICES" | grep -q $1; then
 		enable)
 			/sbin/uci set $SERVICENAME.@$SECTION[0].enabled=1
 			/sbin/uci commit $SERVICENAME
-			/etc/init.d/$SERVICENAME restart
+			/etc/init.d/$init restart
 			exit 0
 		;;
 
 		disable)
 			/sbin/uci set $SERVICENAME.@$SECTION[0].enabled=0
 			/sbin/uci commit $SERVICENAME
-			/etc/init.d/$SERVICENAME stop
+			/etc/init.d/$init stop
 			exit 0
 		;;
 
@@ -37,7 +40,7 @@ if echo "$SERVICES" | grep -q $1; then
 		;;
 	esac
 	if echo " samba samba4 afpd vsftpd " | grep -q " $SERVICENAME "; then
-		/etc/init.d/$SERVICENAME $2
+		/etc/init.d/$init $2
 	fi
 else
 	echo "Service: $1 is not yet supported"
