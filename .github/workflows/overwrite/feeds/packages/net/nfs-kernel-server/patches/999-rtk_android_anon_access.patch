@@ -1,0 +1,13 @@
+--- a/support/nfs/exports.c
++++ b/support/nfs/exports.c
+@@ -91,6 +91,10 @@ static void init_exportent (struct expor
+ 	}
+ 	ee->e_anonuid = 65534;
+ 	ee->e_anongid = 65534;
++	if (getenv("ANDROID") != NULL) {
++		ee->e_anonuid = 1023;
++		ee->e_anongid = 1023;
++	}
+ 	ee->e_squids = NULL;
+ 	ee->e_sqgids = NULL;
+ 	ee->e_mountpoint = NULL;
