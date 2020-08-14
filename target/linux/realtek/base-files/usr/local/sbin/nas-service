@@ -36,7 +36,7 @@ if echo "$SERVICES" | grep -q $1; then
 			exit 1
 		;;
 	esac
-	if echo " samba samba4 netatalk " | grep -q " $SERVICENAME "; then
+	if echo " samba samba4 " | grep -q " $SERVICENAME "; then
 		/etc/init.d/$init $2
 	fi
 else

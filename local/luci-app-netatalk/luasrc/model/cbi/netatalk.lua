@@ -12,7 +12,7 @@ o = s:option(Flag, "enabled", translate("Enable"))
 o.rmempty = false
 
 function o.cfgvalue(self, section)
-	return luci.sys.init.enabled("netatalk")
+	return luci.sys.init.enabled("netatalk") and self.enabled or "0"
 end
 
 function o.write(self, section, value)
@@ -21,7 +21,6 @@ function o.write(self, section, value)
 		luci.sys.call("/etc/init.d/netatalk start >/dev/null")
 	else
 		luci.sys.call("/etc/init.d/netatalk stop >/dev/null")
-		luci.sys.init.disable("netatalk")
 	end
 	return Flag.write(self, section, value)
 end

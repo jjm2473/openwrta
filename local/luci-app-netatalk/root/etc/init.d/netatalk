@@ -15,10 +15,10 @@ start_instance()
     config_get hostname $1 hostname
     config_get path $1 path
 
-	if ! enabled; then
-		stop
-		exit 0
-	fi
+    if ! enabled; then
+        stop
+        exit 0
+    fi
 
     sed -i "/^path =/c\path = $path" $CONF_FILE
     sed -i "/^hostname =/c\hostname = $hostname" $CONF_FILE
