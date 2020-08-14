@@ -1,0 +1,11 @@
+#!/bin/sh
+
+uci -q batch <<-EOF >/dev/null
+	delete ucitrack.@minidlna[-1]
+	add ucitrack minidlna
+	set ucitrack.@minidlna[-1].init=minidlna
+	commit ucitrack
+EOF
+
+rm -f /tmp/luci-indexcache
+exit 0

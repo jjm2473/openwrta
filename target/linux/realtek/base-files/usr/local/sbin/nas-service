@@ -10,15 +10,13 @@ fi
 
 if echo "$SERVICES" | grep -q $1; then
 	SERVICENAME=$1
+	SECTION=$SERVICENAME
 	[ "$SERVICENAME" == "netatalk" ] && SERVICENAME="afpd"
 	[ "$SERVICENAME" == "samba" -a ! -f /etc/init.d/samba ] && SERVICENAME="samba4"
 
 	init=$SERVICENAME
 	[ "$init" == "vsftpd" -a -f /etc/init.d/vsftpd-uci ] && init="vsftpd-uci"
 
-	SECTION=$SERVICENAME
-	[ "$SECTION" == "samba4" ] && SECTION="samba"
-	[ "$SECTION" == "afpd" ] && SECTION="netatalk"
 	case "$2" in
 		enable)
 			/sbin/uci set $SERVICENAME.@$SECTION[0].enabled=1
@@ -39,7 +37,7 @@ if echo "$SERVICES" | grep -q $1; then
 			exit 1
 		;;
 	esac
-	if echo " samba samba4 afpd vsftpd " | grep -q " $SERVICENAME "; then
+	if echo " samba samba4 afpd " | grep -q " $SERVICENAME "; then
 		/etc/init.d/$init $2
 	fi
 else

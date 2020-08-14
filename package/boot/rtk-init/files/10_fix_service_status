@@ -9,7 +9,8 @@ fi
 [ -f /etc/config/samba -a ! -L /etc/config/samba ] && ln -s samba /etc/config/samba4
 [ -f /etc/config/samba4 -a ! -L /etc/config/samba4 ] && ln -s samba4 /etc/config/samba
 
-NO_ST_SERVICES="samba samba4 afpd vsftpd minidlna"
+# just procded init script should be set enabled flag by init status.
+NO_ST_SERVICES="samba samba4 afpd netatalk"
 
 for service in $NO_ST_SERVICES; do
     init=$service
@@ -27,6 +28,18 @@ for service in $NO_ST_SERVICES; do
             /sbin/uci set $service.config.enabled=0
         fi
         /sbin/uci commit $service
+    fi
+done
+
+for service in vsftpd minidlna forked-daapd transmission; do
+    if [ -e /etc/init.d/$service ]; then
+        [ -e /etc/config/$service ] || touch /etc/config/$service
+        if ! uci get $service.config.enabled >>/dev/null 2>&1; then
+            uci rename $service.@$service[0]='config' >>/dev/null 2>&1
+            uci set $service.config=$service
+            uci set $service.config.enabled=0
+            uci commit $service
+        fi
     fi
 done
 
