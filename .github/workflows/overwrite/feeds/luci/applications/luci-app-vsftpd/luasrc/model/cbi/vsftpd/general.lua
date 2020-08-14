@@ -14,6 +14,11 @@ $Id$
 
 m = Map("vsftpd", translate("FTP Server - General Settings"))
 
+s = m:section(NamedSection, "config", "vsftpd", translate("Global Settings"))
+
+o = s:option(Flag, "enabled", translate("Enabled"))
+o.rmempty = false
+
 sl = m:section(NamedSection, "listen", "listen", translate("Listening Settings"))
 
 o = sl:option(Flag, "enable4", translate("Enable IPv4"))

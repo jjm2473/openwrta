@@ -4,6 +4,12 @@
 START=49
 
 start() {
+	local enabled
+	config_load vsftpd
+	config_get_bool enabled config enabled 0
+	if [ "$enabled" -eq 0 ]; then
+		return 1
+	fi
 	/usr/sbin/vsftpd_prepare
 	service_start /usr/sbin/vsftpd_wrapper ipv4
 	service_start /usr/sbin/vsftpd_wrapper ipv6
