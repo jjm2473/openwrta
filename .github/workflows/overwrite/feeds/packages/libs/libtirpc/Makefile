@@ -17,7 +17,10 @@ PKG_BUILD_PARALLEL:=1
 HOST_BUILD_PARALLEL:=1
 
 include $(INCLUDE_DIR)/package.mk
+
+ifneq ($(HOST_OS),Darwin)
 include $(INCLUDE_DIR)/host-build.mk
+endif
 
 define Package/libtirpc
   SECTION:=libs
@@ -50,5 +53,8 @@ define Build/InstallDev
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/pkgconfig/libtirpc.pc $(1)/usr/lib/pkgconfig/libtirpc.pc
 endef
 
+ifneq ($(HOST_OS),Darwin)
 $(eval $(call HostBuild))
+endif
+
 $(eval $(call BuildPackage,libtirpc))
