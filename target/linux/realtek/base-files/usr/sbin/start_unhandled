@@ -1,0 +1,10 @@
+#!/bin/sh
+SERVICE=$1
+
+[ -n "$SERVICE" ] || exit 1
+[ -f "/etc/init.d/$SERVICE" ] || exit 1
+/etc/init.d/$SERVICE enabled || exit 0
+
+if ! ubus call service list "{ \"name\": \"$SERVICE\" }" | grep -q $SERVICE; then
+	/etc/init.d/$SERVICE start
+fi

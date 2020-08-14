@@ -1,0 +1,5 @@
+#!/bin/sh
+
+for SERVICE in transmission; do
+    uci set "ucitrack.@$SERVICE[-1].exec=/usr/sbin/start_unhandled $SERVICE"
+done
