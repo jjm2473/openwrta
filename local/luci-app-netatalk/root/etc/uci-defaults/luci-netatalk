@@ -1,0 +1,16 @@
+#!/bin/sh
+
+/etc/init.d/afpd enabled && {
+	/etc/init.d/afpd stop
+	/etc/init.d/afpd disable
+}
+
+uci -q batch <<-EOF >/dev/null
+	delete ucitrack.netatalk
+	set ucitrack.netatalk=netatalk
+	set ucitrack.netatalk.init=netatalk
+	commit ucitrack
+EOF
+
+rm -f /tmp/luci-indexcache
+exit 0

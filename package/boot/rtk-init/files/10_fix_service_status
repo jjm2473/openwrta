@@ -5,12 +5,11 @@ if [ -e /etc/config/minidlna ]; then
     /sbin/uci commit minidlna
 fi
 
-[ -e /etc/config/netatalk ] || ln -s afpd /etc/config/netatalk 
 [ -f /etc/config/samba -a ! -L /etc/config/samba ] && ln -s samba /etc/config/samba4
 [ -f /etc/config/samba4 -a ! -L /etc/config/samba4 ] && ln -s samba4 /etc/config/samba
 
 # just procded init script should be set enabled flag by init status.
-NO_ST_SERVICES="samba samba4 afpd netatalk"
+NO_ST_SERVICES="samba samba4 netatalk"
 
 for service in $NO_ST_SERVICES; do
     init=$service

@@ -1,0 +1,4 @@
+config netatalk 'config'
+	option enabled		'0'
+	option path		'/mnt'
+	option hostname		'OpenWRT - TimeMachine'
