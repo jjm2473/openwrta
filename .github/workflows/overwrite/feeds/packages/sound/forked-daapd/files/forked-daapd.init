@@ -35,7 +35,7 @@ start_instance() {
 
     stop
     if [ "$enabled" -gt 0 ];then
-      $SSD -p $PID -S -x $BIN -- -P $PID
+      $SSD -p $PID -S -b -x $BIN -- -P $PID
     fi
 }
 
