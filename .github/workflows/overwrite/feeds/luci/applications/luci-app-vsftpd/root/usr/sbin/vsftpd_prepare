@@ -203,6 +203,7 @@ if [ x$anon_enable = x1 ]; then
 	output_bool anonymous others "anon_other_write_enable" 0
 
 	mkdir -p $anon_root
+	eval "mkdir -p ~$ftp_username"
 else
 	output_const "anonymous_enable" NO
 fi
@@ -217,13 +218,16 @@ vuser_enabled=0
 if [ x`get_value vuser enabled` = x1 ]; then
 	vuser_enabled=1
 
-	output_const "guest_enable" YES
-	output_field vuser username "guest_username" ftp
+	config_get guest_username vuser username ftp
 
-	output_const "uci_config_name" vsftpd
+	output_const "guest_enable" YES
+	output_const "guest_username" $guest_username
+
 	output_const "user_config_dir" "/var/run/vsftpd/users"
 
 	config_foreach vusers_iterate user
+
+	eval "mkdir -p ~$guest_username"
 fi
 
 # local user
