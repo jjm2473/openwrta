@@ -1,7 +1,7 @@
 #!/bin/sh
 
 if [ -e /etc/config/minidlna ]; then
-    /sbin/uci set minidlna.@minidlna[0].interface='br-lan eth0 wlan0'
+    /sbin/uci set minidlna.@minidlna[0].interface='br-lan,eth0,wlan0'
     /sbin/uci commit minidlna
 fi
 
