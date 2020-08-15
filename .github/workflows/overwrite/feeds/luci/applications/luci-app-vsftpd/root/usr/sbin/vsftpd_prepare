@@ -186,15 +186,12 @@ ftp_username=`get_value anonymous username`
 if [ -z $ftp_username ]; then ftp_username="ftp"; fi
 output_const "ftp_username" $ftp_username
 
-mkdir -m 0755 -p /home/$ftp_username
-chown $ftp_username:$ftp_username /home/$ftp_username
-
 output_const "anon_world_readable_only" NO
 
 anon_enable=`get_value anonymous enabled`
 if [ x$anon_enable = x1 ]; then
 	anon_root=`get_value anonymous root`
-	if [ -z $anon_root ]; then anon_root="/home/ftp"; fi
+	if [ -z "$anon_root" ]; then anon_root="/home/ftp"; fi
 
 	output_const "anonymous_enable" YES
 	output_const "no_anon_password" YES
