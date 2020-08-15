@@ -30,19 +30,10 @@ servername.rmempty = true
 function servername.cfgvalue(self, section)
 	local name = Value.cfgvalue(self, section)
 	if name == nil then
-	  for Line in io.lines("/etc/afp.conf") do
-	    if Line:find("hostname") and not Line:find(";")  then
-	  	  start,p_end = string.find(Line, "\"")
-	  	  name = string.sub(Line,start+1,string.len(Line)-1)
-	    end
-	  end
-	  if name == "" then
-	  	local f = io.popen("/usr/bin/hostname")
-	  	local hostname = f:read("*a") or ""
-	  	f:close()
-	  	hostname = string.gsub(hostname, "\n$", "")
-	  	name = hostname.." - TimeMachine"
-	  end
+		local f = io.open("/proc/sys/kernel/hostname", "r")
+		local hostname = f:read("*all")
+		f:close()
+		name = hostname.." - TimeMachine"
 	end
 	return name
 end

@@ -85,8 +85,9 @@ define Package/netatalk/install
 	$(CP) $(PKG_INSTALL_DIR)/usr/sbin/afpd $(1)/usr/sbin/
 	$(CP) $(PKG_INSTALL_DIR)/usr/sbin/cnid_dbd $(1)/usr/sbin/
 	$(CP) $(PKG_INSTALL_DIR)/usr/sbin/cnid_metad $(1)/usr/sbin/
+	$(CP) $(PKG_INSTALL_DIR)/usr/sbin/netatalk $(1)/usr/sbin/
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/uams/*.so $(1)/usr/lib/uams/
-	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/etc/afp.conf $(1)/etc/
+	$(INSTALL_DATA) ./files/afp.conf $(1)/etc/
 	$(INSTALL_DATA) $(PKG_INSTALL_DIR)/etc/extmap.conf $(1)/etc/
 	$(INSTALL_BIN) ./files/afpd.init $(1)/etc/init.d/afpd
 endef

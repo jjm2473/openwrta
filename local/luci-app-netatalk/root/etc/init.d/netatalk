@@ -37,14 +37,10 @@ start_service()
 {
 	init_config
 
+	mkdir -p /var/netatalk/CNID/Files
 	procd_open_instance
-	procd_set_param command /usr/sbin/afpd -d -F $CONF_FILE
+	procd_set_param command /usr/sbin/netatalk -d -F $CONF_FILE
 	procd_set_param file $CONF_FILE
-	procd_set_param respawn
-	procd_close_instance
-
-	procd_open_instance
-	procd_set_param command /usr/sbin/cnid_metad -d
 	procd_set_param respawn
 	procd_close_instance
 }
