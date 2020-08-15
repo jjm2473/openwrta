@@ -23,7 +23,7 @@ start_instance() {
     sed -i '/directories =/c\	directories = "'$path'"' $DAAPD_CONF
     sed -i '/db_path =/c\	db_path = "'$db_path'"' $DAAPD_CONF
     name=${name// /\\\\s}
-    sed -i '/^[^#].*name =/c\	name = "'$name'"' $DAAPD_CONF
+    sed -i '/^[^#] *name =/c\	name = "'$name'"' $DAAPD_CONF
     sed -i 's/\\s/ /g' $DAAPD_CONF
 
     dirpath=`dirname $db_path`
