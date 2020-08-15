@@ -27,6 +27,7 @@ boot() {
 	mkdir -p /var/lock
 	mkdir -p /var/state
 	mkdir -p /var/tmp
+	chmod 1777 /var/tmp
 	mkdir -p /tmp/.uci
 	chmod 0700 /tmp/.uci
 	touch /var/log/wtmp
