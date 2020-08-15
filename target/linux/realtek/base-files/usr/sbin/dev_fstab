@@ -67,9 +67,9 @@ set_fstab() {
 				btrfs)
 					options="noatime";;
 				ufsd)
-					options="force,nls=utf8,uid=1023,gid=1023,umask=0007,noatime,user_xattr=1";;
+					options="force,nls=utf8,uid=1023,gid=1023,dmask=0002,fmask=0003,noatime,user_xattr=1";;
 				'vfat')
-					options="utf8,uid=1023,gid=1023,dmask=0007,fmask=0007,shortname=mixed";;
+					options="utf8,uid=1023,gid=1023,dmask=0002,fmask=0003,shortname=mixed";;
                 *)
                 	enabled=0;;
 			esac
