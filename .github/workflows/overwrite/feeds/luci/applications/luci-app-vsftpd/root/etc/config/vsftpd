@@ -34,7 +34,7 @@ config connection 'connection'
 
 config anonymous 'anonymous'
 	option enabled '0'
-	option username 'nobody'
+	option username 'ftp'
 	option root '/mnt'
 	option umask '022'
 	option writemkdir '0'
