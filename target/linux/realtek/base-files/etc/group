@@ -11,7 +11,7 @@ nogroup:x:65534:
 aid_input:x:1004:root
 aid_log:x:1007:root
 aid_dhcp:x:1014:
-aid_sdcard_rw:x:1015:
+aid_sdcard_rw:x:1015:root,transmission,nobody
 aid_mdnsr:x:1020:
 aid_sdcard_r:x:1028:
 aid_shell:x:2000:root
@@ -20,4 +20,4 @@ aid_net_raw:x:3004:
 aid_net_admin:x:3005:root
 aid_net_bw_stats:x:3006:
 aid_readproc:x:3009:
-media_rw:x:1023:nobody
+media_rw:x:1023:root,nobody,transmission,aria2,minidlna,daapd

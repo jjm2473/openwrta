@@ -8,7 +8,7 @@
 +#include "android_filesystem_config.h"
 +
 +// ordered
-+static const gid_t MIN_GROUPS[] = {AID_DHCP, AID_SDCARD_RW, AID_MDNSR, AID_MEDIA_RW, AID_SDCARD_R,
++static const gid_t MIN_GROUPS[] = {AID_DHCP, AID_MDNSR, AID_SDCARD_R,
 +								AID_NET_BT_ADMIN, AID_NET_BT, AID_INET, AID_NET_RAW, AID_NET_BW_STATS, 
 +								AID_READPROC};
 +static const size_t MIN_GROUPS_LEN = sizeof(MIN_GROUPS)/sizeof(gid_t);

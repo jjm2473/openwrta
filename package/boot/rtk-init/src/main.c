@@ -35,7 +35,7 @@
 
 #define OPENWRT_INIT "/etc/preinit"
 
-const gid_t ROOT_GROUPS[] = {AID_SHELL, AID_CACHE,
+const gid_t ROOT_GROUPS[] = {AID_SDCARD_RW, AID_MEDIA_RW, AID_SHELL, AID_CACHE,
                             AID_NET_ADMIN, AID_NET_BW_ACCT};
 
 int main(int argc, char **argv, char **envp) {
