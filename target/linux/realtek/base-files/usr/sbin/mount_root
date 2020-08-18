@@ -6,7 +6,7 @@ mount_loop() {
     [ $((`partx -g -s -o START --nr 1:1 /dev/mmcblk0`>>11)) -gt 512 ] || return -1
 
     local LOOPDEV=`losetup --offset $((128*1024*1024)) --sizelimit $(((512-128)*1024*1024)) --show -f /dev/mmcblk0`
-    [ -n "$LOOPDEV" ] || return -1
+    [ -n "$LOOPDEV" ] || return 1
 
     fsck.ext4 -y $LOOPDEV
     mount -t ext4 $LOOPDEV /overlay && return 0
@@ -15,7 +15,7 @@ mount_loop() {
     mount -t ext4 $LOOPDEV /overlay && return 0
 
     losetup -d $LOOPDEV
-    return -1
+    return 1
 }
 
 mount_nasetc() {
@@ -27,21 +27,21 @@ mount_nasetc() {
         sync
         mount -t ext4 $DEV_ETC /overlay && return 0
     fi
-    return -1
+    return 1
 }
 
 do_mount_overlayfs() {
     if [ -e /rom/note ]; then
-        mount_loop || mount_nasetc || return -1
+        mount_loop || mount_nasetc || return 1
 
         mkdir -p /overlay/upper /overlay/work
         mount -o noatime,lowerdir=/,upperdir=/overlay/upper,workdir=/overlay/work -t overlay "overlayfs:/overlay" /mnt \
-            || return -1
+            || return 1
 
         # pivot
         mount --move /proc /mnt/proc
 
-        pivot_root /mnt /mnt/rom || return -1
+        pivot_root /mnt /mnt/rom || return 1
 
         mount --move /rom/dev /dev
         mount --move /rom/tmp /tmp
