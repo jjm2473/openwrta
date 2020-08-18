@@ -1,16 +1,38 @@
 #!/bin/sh
 # Copyright (C) 2010 OpenWrt.org
 
+mount_loop() {
+    # check if there has enough free space before first partition
+    [ $((`partx -g -s -o START --nr 1:1 /dev/mmcblk0`>>11)) -gt 512 ] || return -1
+
+    local LOOPDEV=`losetup --offset $((128*1024*1024)) --sizelimit $(((512-128)*1024*1024)) --show -f /dev/mmcblk0`
+    [ -n "$LOOPDEV" ] || return -1
+
+    fsck.ext4 -y $LOOPDEV
+    mount -t ext4 $LOOPDEV /overlay && return 0
+
+    mkfs.ext4 -L XXXNASETC $LOOPDEV
+    mount -t ext4 $LOOPDEV /overlay && return 0
+
+    losetup -d $LOOPDEV
+    return -1
+}
+
+mount_nasetc() {
+    DEV_ETC=`blkid -L nasetc`
+    if [ -n "$DEV_ETC" ]; then
+        fsck -t ext4 -y $DEV_ETC || \
+            fsck.ext4 -y $DEV_ETC
+        resize2fs $DEV_ETC
+        sync
+        mount -t ext4 $DEV_ETC /overlay && return 0
+    fi
+    return -1
+}
+
 do_mount_overlayfs() {
     if [ -e /rom/note ]; then
-        DEV_ETC=`blkid -L nasetc`
-        if [ -n "$DEV_ETC" ]; then
-            fsck -t ext4 -y $DEV_ETC || \
-                fsck.ext4 -y $DEV_ETC
-            resize2fs $DEV_ETC
-            sync
-            mount -t ext4 $DEV_ETC /overlay || return -1
-        fi
+        mount_loop || mount_nasetc || return -1
 
         mkdir -p /overlay/upper /overlay/work
         mount -o noatime,lowerdir=/,upperdir=/overlay/upper,workdir=/overlay/work -t overlay "overlayfs:/overlay" /mnt \
