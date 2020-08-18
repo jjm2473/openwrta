@@ -34,8 +34,7 @@ setup_interface () {
 	ip=$(echo "$ipmask" | awk '{print $1;}')
 	subnet=$(echo "$ipmask" | awk '{print $2;}')
 
-	proto_init_update "*" 1
-	proto_set_keep 1
+	proto_init_update "*" 1 true
 	proto_add_ipv4_address "$ip" "${subnet:-255.255.255.0}"
 	# TODO: apply $broadcast
 
@@ -81,8 +80,7 @@ setup_interface () {
 }
 
 deconfig_interface() {
-	proto_init_update "*" 0
-	proto_set_keep 1
+	proto_init_update "*" 0 true
 	proto_send_update "$INTERFACE"
 }
 
