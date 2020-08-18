@@ -1,0 +1,28 @@
+#!/bin/sh
+# simple auth script by jjm2473, for Openwrt vsftpd
+# call by pam_exec.so
+# env:
+# PAM_USER=user
+# SHLVL=1
+# PAM_RHOST=192.168.1.10
+# PAM_TYPE=auth
+# PAM_RUSER=user
+# PAM_SERVICE=ftp
+# PAM_TTY=ftp
+# PWD=/
+
+[ "$PAM_TYPE" == "auth" ] || exit 1
+
+VUSER_DB=/var/run/vsftpd/vusers
+VUSER_SALT=J-JM*PAss
+
+USER=$PAM_USER
+
+[ -n "$USER" ] || exit 1
+
+PASS=`cat`
+PASS=`echo -n "$PASS"` # remove tailing nul
+
+TOK=$USER:`echo -n "$VUSER_SALT$PASS" | md5sum | cut -f1 -d' '`
+
+grep -qxF "$TOK" $VUSER_DB

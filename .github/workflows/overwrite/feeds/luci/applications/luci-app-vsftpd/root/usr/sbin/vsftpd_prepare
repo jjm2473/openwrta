@@ -110,6 +110,7 @@ vusers_iterate()
 	if ! [ -d "$home" ]; then
 		mkdir -p $home
 	fi
+	echo "$name:"`echo -n "$VUSER_SALT$password" | md5sum | cut -f1 -d' '` >> $VUSER_DB
 }
 
 VAR=/var/run/vsftpd
@@ -117,6 +118,7 @@ CONF=$VAR/vsftpd.conf
 VUSER_DB=$VAR/vusers
 VUSER_CONF_DIR=$VAR/users
 CHROOT_DIR=$VAR/empty
+VUSER_SALT=J-JM*PAss
 
 rm -f $CONF
 rm -rf $VUSER_CONF_DIR $CHROOT_DIR
@@ -214,6 +216,11 @@ output_bool log xreflog "xferlog_enable" 0
 output_field log 'file' "vsftpd_log_file" 0
 
 # users
+output_const "pam_service_name" vsftpd
+rm -f $VUSER_DB
+touch $VUSER_DB
+chmod 0600 $VUSER_DB
+echo -n >$VUSER_DB
 vuser_enabled=0
 if [ x`get_value vuser enabled` = x1 ]; then
 	vuser_enabled=1
@@ -229,6 +236,7 @@ if [ x`get_value vuser enabled` = x1 ]; then
 
 	eval "mkdir -p ~$guest_username"
 fi
+chmod 0400 $VUSER_DB
 
 # local user
 output_const "allow_writeable_chroot" YES

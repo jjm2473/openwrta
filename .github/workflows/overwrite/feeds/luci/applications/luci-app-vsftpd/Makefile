@@ -9,7 +9,7 @@ LUCI_TITLE:=LuCI support for VSFTPD
 LUCI_DEPENDS:=+vsftpd-tls
 LUCI_PKGARCH:=all
 PKG_VERSION:=1.0
-PKG_RELEASE:=3
+PKG_RELEASE:=4
 
 define Package/luci-app-vsftpd/conffiles
 /etc/config/vsftpd

@@ -1,0 +1,5 @@
+# There is not user db in Openwrt, so using simple auth script
+
+auth requisite /lib/security/pam_exec.so expose_authtok /usr/sbin/vsftpd.auth
+auth required /lib/security/pam_permit.so
+account required /lib/security/pam_permit.so
