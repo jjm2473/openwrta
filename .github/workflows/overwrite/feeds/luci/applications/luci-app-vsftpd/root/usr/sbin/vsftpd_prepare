@@ -217,6 +217,14 @@ output_field log 'file' "vsftpd_log_file" 0
 
 # users
 output_const "pam_service_name" vsftpd
+
+VUSER_SALT=`dd if=/dev/urandom bs=1 count=1024 2>/dev/null | md5sum | cut -f1 -d' '`
+rm -f $VUSER_DB.salt
+touch $VUSER_DB.salt
+chmod 0600 $VUSER_DB.salt
+echo -n "$VUSER_SALT" >$VUSER_DB.salt
+chmod 0400 $VUSER_DB.salt
+
 rm -f $VUSER_DB
 touch $VUSER_DB
 chmod 0600 $VUSER_DB

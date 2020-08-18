@@ -23,6 +23,8 @@ USER=$PAM_USER
 PASS=`cat`
 PASS=`echo -n "$PASS"` # remove tailing nul
 
+VUSER_SALT=`cat $VUSER_DB.salt`
+
 TOK=$USER:`echo -n "$VUSER_SALT$PASS" | md5sum | cut -f1 -d' '`
 
 grep -qxF "$TOK" $VUSER_DB
