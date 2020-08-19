@@ -58,25 +58,16 @@ setup_interface () {
 	# CIDR STATIC ROUTES (rfc3442)
 	# [ -n "$staticroutes" ] && set_classless_routes $staticroutes
 	# [ -n "$msstaticroutes" ] && set_classless_routes $msstaticroutes
-	if ! [ -n "$ANDROID" -o -f /tmp/.android ]; then
-		for i in $dns; do
-			proto_add_dns_server "$i"
-		done
-		for i in $domain; do
-			proto_add_dns_search "$i"
-		done
-	fi
+	
+	# for i in $dns; do
+	# 	proto_add_dns_server "$i"
+	# done
+	# for i in $domain; do
+	# 	proto_add_dns_search "$i"
+	# done
 
 	proto_add_data
 	[ -n "$ZONE" ]     && json_add_string zone "$ZONE"
-	if ! [ -n "$ANDROID" -o -f /tmp/.android ]; then	
-		[ -n "$ntpsrv" ]   && json_add_string ntpserver "$ntpsrv"
-		[ -n "$timesvr" ]  && json_add_string timeserver "$timesvr"
-		[ -n "$hostname" ] && json_add_string hostname "$hostname"
-		[ -n "$message" ]  && json_add_string message "$message"
-		[ -n "$timezone" ] && json_add_int timezone "$timezone"
-		[ -n "$lease" ]    && json_add_int leasetime "$lease"
-	fi
 	proto_close_data
 
 	proto_send_update "$INTERFACE"
