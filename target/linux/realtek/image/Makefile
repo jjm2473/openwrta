@@ -8,7 +8,8 @@ include $(TOPDIR)/rules.mk
 include $(INCLUDE_DIR)/image.mk
 
 define Build/realtek-ota
-	./android/mkota.sh $(IMAGE_ROOTFS) $@
+	dd if=$(IMAGE_ROOTFS) of=$(IMAGE_ROOTFS).padded bs=4096 conv=sync
+	./android/mkota.sh $(IMAGE_ROOTFS).padded $@
 endef
 
 ifeq ($(SUBTARGET),rtd129x)
