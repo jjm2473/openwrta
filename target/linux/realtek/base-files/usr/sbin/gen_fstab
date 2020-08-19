@@ -22,7 +22,7 @@ for DEVPATH in `blkid -o device`; do
 	enabled=0
 	[ "$anon_mount" == "1" ] && {
 		except=`echo "$device" | grep -E "mmcblk0|mtdblock"`
-		[ -z "except" ] && enabled=1
+		[ -z "$except" ] && enabled=1
 	}
 	enabled_swap=0
 	[ "$anon_swap" == "1" ] && enabled_swap=1

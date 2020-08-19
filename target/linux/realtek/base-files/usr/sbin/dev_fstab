@@ -18,13 +18,13 @@ mount_swap=0
 
 set_fstab() {
 
-	my_fstype=`blkid /dev/${device} | awk -F " TYPE=" '{print $2}'| awk -F "\"" '{print $2}'`
-	
+	local my_fstype=`blkid /dev/${device} | awk -F " TYPE=" '{print $2}'| awk -F "\"" '{print $2}'`
+
 	[ -n "$my_fstype" ] && {
 		logger -t Auto-Mount "New block.File system:${my_fstype}"
 		if [ "$my_fstype" = 'swap' ]; then
 			
-			n=$(uci show fstab | grep "fstab.@swap" | grep -c "=swap")
+			local n=$(uci show fstab | grep "fstab.@swap" | grep -c "=swap")
 			
 			[ $n -gt 0 ] && {
 				for i in $(seq 0 $n)
@@ -48,7 +48,7 @@ set_fstab() {
 				swapon /dev/$device
 			}
 
-		else # no swap
+		else # not swap
 
 			case "$my_fstype" in
 				hfs*)
@@ -59,7 +59,7 @@ set_fstab() {
 					my_fstype="ufsd";;
 			esac
 
-			options=""
+			local options=""
 
 			case "$my_fstype" in
 				ext*)
@@ -76,21 +76,23 @@ set_fstab() {
 
 			section=$(echo $get_uuid | sed 's/-//g')
 
-			echo "config mount '${section}'"
+			local mountpoint=/mnt/$device
+
+			echo "config mount '$section'"
 			echo -e "\toption enabled '$enabled'"
-			echo -e "\toption device '/dev/$device'"
-			echo -e "\toption target '/mnt/$device'"
+			echo -e "\toption uuid '$get_uuid'"
+			echo -e "\toption target '$mountpoint'"
 			echo -e "\toption fstype '$my_fstype'"
 			[ -n "$options" ] && echo -e "\toption options '$options'"
 			echo 
 
 			[ "$mount" == "1" -a "$enabled" == "1" ] && {
-				[ -d "/mnt/${device}" ] || mkdir -p "/mnt/${device}"
+				[ -d "$mountpoint" ] || mkdir -p "$mountpoint"
 
-				cmd="mount"
+				local cmd="mount"
 				[ -n "$my_fstype" ] && cmd="$cmd -t $my_fstype"
 				[ -n "$options" ] && cmd="$cmd -o $options"
-				cmd="$cmd /dev/$device /mnt/${device}"
+				cmd="$cmd /dev/$device $mountpoint"
 
 				$cmd
 			}
@@ -114,18 +116,15 @@ if [ "$device" != "block" ]; then
 	echo "$blkinfo" | grep -q ' LABEL="rootfs_data"' && return 1
 
 	get_uuid=`echo "$blkinfo" | awk -F " UUID=" '{print $2}'| awk -F "\"" '{print $2}'`
-	[ -n "$get_uuid" ] && {
-		logger -t Auto-Mount "Block /dev/${device} added."
-		logger -t Auto-Mount "UUID=$get_uuid"
-		/usr/sbin/blockdev --setra 16384 /dev/${device}
-		have_uuid=$(uci show fstab | grep -cF "$get_uuid")
-		[ "$have_uuid" = "0" ] && {
-			# uuid未配置
-			section=$(echo $get_uuid | sed 's/-//g')
-			uci get "fstab.$section" 2>>/dev/null >>/dev/null && return 1
-			set_fstab && return 0
-		}
-	}
+	[ -n "$get_uuid" ] || return 1
+	logger -t Auto-Mount "Block /dev/${device} added."
+	logger -t Auto-Mount "UUID=$get_uuid"
+	/usr/sbin/blockdev --setra 16384 /dev/${device}
+	uci show fstab | grep -qF "$get_uuid" && return 1
+	# uuid未配置
+	section=$(echo $get_uuid | sed 's/-//g')
+	uci get "fstab.$section" >/dev/null 2>&1 && return 1
+	set_fstab && return 0
 fi
 
 return 1
