@@ -2,16 +2,41 @@
 # Copyright (C) 2010 OpenWrt.org
 
 mount_loop() {
-    # check if there has enough free space before first partition
-    [ $((`partx -g -s -o START --nr 1:1 /dev/mmcblk0`>>11)) -gt 512 ] || return -1
+    local DEV_ETC=`blkid -L nasetc`
+    if [ -n "$DEV_ETC" ]; then
+        # default overlay partition is large enough
+        [ $((`partx -b -g -s -o SIZE $DEV_ETC`>>20)) -ge 256 ] && (
+            return 1
+        )
+    fi
 
-    local LOOPDEV=`losetup --offset $((128*1024*1024)) --sizelimit $(((512-128)*1024*1024)) --show -f /dev/mmcblk0`
+    # check if there has enough free space before first partition
+    [ $((`partx -g -s -o START --nr 1:1 /dev/mmcblk0`>>11)) -gt 512 ] || return 1
+
+    local START=$((128*1024*1024))
+    local END=$((512*1024*1024))
+    local SIZE=$(($END - $START))
+
+    local LOOPDEV=`echo "/mmcblk0 /dev/mmcblk0" | xargs -n1 losetup -n -O NAME --offset $START -j`
+
+    [ -n "$LOOPDEV" ] || LOOPDEV=`losetup -L --offset $START --sizelimit $SIZE --show -f /dev/mmcblk0`
+
     [ -n "$LOOPDEV" ] || return 1
 
+    if mount | grep -qw $LOOPDEV; then
+        mount | grep -qw "$LOOPDEV on /overlay" && return 0
+        return 1
+    fi
+
     fsck.ext4 -y $LOOPDEV
+    sync
     mount -t ext4 $LOOPDEV /overlay && return 0
 
+    # $LOOPDEV already has filesystem, maybe broken or something, dont touch it
+    [ -n "`block info $LOOPDEV`" ] && return 1
+
     mkfs.ext4 -L XXXNASETC $LOOPDEV
+    sync
     mount -t ext4 $LOOPDEV /overlay && return 0
 
     losetup -d $LOOPDEV
@@ -19,8 +44,12 @@ mount_loop() {
 }
 
 mount_nasetc() {
-    DEV_ETC=`blkid -L nasetc`
+    local DEV_ETC=`blkid -L nasetc`
     if [ -n "$DEV_ETC" ]; then
+        if mount | grep -qw $DEV_ETC; then
+            mount | grep -qw "$DEV_ETC on /overlay" && return 0
+            return 1
+        fi
         fsck -t ext4 -y $DEV_ETC || \
             fsck.ext4 -y $DEV_ETC
         resize2fs $DEV_ETC
@@ -30,9 +59,13 @@ mount_nasetc() {
     return 1
 }
 
+mount_ram() {
+    mount -t tmpfs -o noatime,mode=0755 tmpfs /overlay
+}
+
 do_mount_overlayfs() {
     if [ -e /rom/note ]; then
-        mount_loop || mount_nasetc || return 1
+        mount_loop || mount_nasetc || mount_ram
 
         mkdir -p /overlay/upper /overlay/work
         mount -o noatime,lowerdir=/,upperdir=/overlay/upper,workdir=/overlay/work -t overlay "overlayfs:/overlay" /mnt \
