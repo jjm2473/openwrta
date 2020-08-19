@@ -4,7 +4,11 @@
 START=01
 
 boot() {
-	[ -n "$ANDROID" ] || return
+	if ! [ -n "$ANDROID" ]; then
+		rm /etc/resolv.conf
+		ln -s /tmp/resolv.conf /etc/resolv.conf
+		return 0
+	fi
 
 	# notify android continue
 	touch /android/.coldplug_done
