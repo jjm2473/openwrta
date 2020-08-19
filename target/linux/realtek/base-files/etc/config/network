@@ -4,6 +4,9 @@ config interface loopback
 	option ipaddr	127.0.0.1
 	option netmask	255.0.0.0
 
+config globals 'globals'
+	option ula_prefix 'fd1e:1e7a:c024::/48'
+
 config interface 'lan'
 	option ifname 'eth0'
 	option proto 'dns'

@@ -20,7 +20,7 @@ define Package/dhcp-dns
   SECTION:=net
   CATEGORY:=Network
   TITLE:=DHCP client (DNS only)
-  DEPENDS:=
+  DEPENDS:=+rpcd-mod-file
 endef
 
 define Package/dhcp-dns/description
