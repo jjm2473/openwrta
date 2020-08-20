@@ -53,14 +53,6 @@ int main(int argc, char **argv, char **envp) {
     EXEC(return, exec_cmd)
 }
 
-static void redirect_stdio_to_android_null() {
-    int nullfd = open(ANDROID_ROOT "/dev/null", O_RDWR);
-    dup2(nullfd, 0);
-    dup2(nullfd, 1);
-    dup2(nullfd, 2);
-    close(nullfd);
-}
-
 static char *prepare(char **argv) {
     int wstatus;
     int *sp58 = &wstatus;
@@ -104,16 +96,16 @@ static char *prepare(char **argv) {
             close(open(ANDROID_ROOT "/.ottwifi", O_CLOEXEC|O_CREAT|O_WRONLY));
         }
 
-        mknod(ANDROID_ROOT "/dev/console", S_IFCHR|S_IRUSR|S_IWUSR, makedev(5, 1));
         mknod(ANDROID_ROOT "/dev/null", S_IFCHR|S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH, makedev(1, 3));
+        if (CONSOLE_ANDROID == console) {
+            mknod(ANDROID_ROOT "/dev/tty", S_IFCHR|S_IRUSR|S_IWUSR, makedev(5, 0));
+            mknod(ANDROID_ROOT "/dev/console", S_IFCHR|S_IRUSR|S_IWUSR, makedev(5, 1));
+        }
 
         // Openwrt + Android
         pid_t cpid = fork(); // 0x400f48
         if (cpid == 0) {
             // openwrt init
-            if (console == CONSOLE_ANDROID) {
-                redirect_stdio_to_android_null();
-            }
             // 0x400f54
             setsid();
             // assign permission from android
@@ -143,7 +135,6 @@ static char *prepare(char **argv) {
             if (console == CONSOLE_OPENWRT) {
                 //  set ro.debuggable=0;
                 debuggable = 0;
-                redirect_stdio_to_android_null();
             }
             // else {
             //     //  set ro.debuggable=1;
