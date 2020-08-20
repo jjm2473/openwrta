@@ -35,35 +35,85 @@
 
 #define OPENWRT_INIT "/etc/preinit"
 
+enum console {
+    CONSOLE_ANDROID,
+    CONSOLE_OPENWRT
+};
+
 const gid_t ROOT_GROUPS[] = {AID_SDCARD_RW, AID_MEDIA_RW, AID_SHELL, AID_CACHE,
                             AID_NET_ADMIN, AID_NET_BW_ACCT};
 
-int main(int argc, char **argv, char **envp) {
-    #define EXEC(pre, cmd) argv[0] = cmd;\
+#define EXEC(pre, cmd) argv[0] = cmd;\
     pre execv(cmd, argv);
 
+static char *prepare(char **argv);
+
+int main(int argc, char **argv, char **envp) {
+    char *exec_cmd = prepare(argv);
+    EXEC(return, exec_cmd)
+}
+
+static void redirect_stdio_to_android_null() {
+    int nullfd = open(ANDROID_ROOT "/dev/null", O_RDWR);
+    dup2(nullfd, 0);
+    dup2(nullfd, 1);
+    dup2(nullfd, 2);
+    close(nullfd);
+}
+
+static char *prepare(char **argv) {
     int wstatus;
     int *sp58 = &wstatus;
     struct stat sb;
     struct stat *sp80 = &sb;
     char sp100[0x80];
     char sp180[0x80];
-    char *hardware = get_cmdline("androidboot.hardware", sp100, 0x80);
-    char *exec_cmd = NULL;
-    if (hardware != NULL && strncmp(hardware, "kylin", 0x5) == 0) {
-        fputs("===== OpenWRT + Android ===== ", stderr);
+    char *cfg = get_cmdline("androidboot.hardware", sp100, 0x80);
+    
+    enum console console = CONSOLE_ANDROID;
+    if (cfg != NULL && strncmp(cfg, "kylin", 0x5) == 0) {
+        fputs("===== OpenWRT + Android ===== \n", stderr);
+        cfg = get_cmdline("console.switch", sp100, 0x80);
+        if (cfg != NULL && strncmp(cfg, "openwrt", 0x7) == 0) {
+            console = CONSOLE_OPENWRT;
+        }
         int router = 0;
         memset(sp180, 0, sizeof(sp180));
         if (stat("/mnt/android/.ottwifi", sp80) != 0) {
             // if /mnt/android/.ottwifi not exists
             router = 1;
-            fputs("===== Router mode ===== ", stderr);    
         }
+
+        mount("tmpfs", ANDROID_ROOT, "tmpfs", MS_NOATIME, "size=10240k");
+        putenv("PATH=/usr/sbin:/usr/bin:/sbin:/bin");
+
+        snprintf(sp180, 0x80, "cp -a /mnt/android/* %s", ANDROID_ROOT);
+        if (system(sp180) < 0) {
+            fputs("Copy Android rootfs failed!\nBoot Openwrt only!\n", stderr);
+            umount(ANDROID_ROOT);
+            return OPENWRT_INIT;
+        }
+        if (router == 0 && get_cmdline("net.switch", sp100, 0x80) != NULL && strncmp(sp100, "openwrt", 0x7) == 0) {
+            //  router mode by bootargs
+            router = 1;
+        }
+        if (router) {
+            fputs("===== Router mode ===== \n", stderr);
+            unlink(ANDROID_ROOT "/.ottwifi");
+        } else {
+            close(open(ANDROID_ROOT "/.ottwifi", O_CLOEXEC|O_CREAT|O_WRONLY));
+        }
+
+        mknod(ANDROID_ROOT "/dev/console", S_IFCHR|S_IRUSR|S_IWUSR, makedev(5, 1));
+        mknod(ANDROID_ROOT "/dev/null", S_IFCHR|S_IRUSR|S_IWUSR|S_IRGRP|S_IWGRP|S_IROTH|S_IWOTH, makedev(1, 3));
 
         // Openwrt + Android
         pid_t cpid = fork(); // 0x400f48
         if (cpid == 0) {
             // openwrt init
+            if (console == CONSOLE_ANDROID) {
+                redirect_stdio_to_android_null();
+            }
             // 0x400f54
             setsid();
             // assign permission from android
@@ -83,26 +133,17 @@ int main(int argc, char **argv, char **envp) {
         } else {
             // android init
             // 0x400fa4
-            mount("tmpfs", ANDROID_ROOT, "tmpfs", MS_NOATIME, "size=10240k");
-            putenv("PATH=/usr/sbin:/usr/bin:/sbin:/bin");
-            snprintf(sp180, 0x80, "cp -a /mnt/android/* %s", ANDROID_ROOT);
-            if (system(sp180) < 0 || chdir(ANDROID_ROOT) < 0) {
+            if (chdir(ANDROID_ROOT) < 0) {
                 // 0x00400ffc: movz w0, 0x1
                 // b 0x4012c8
                 return 1;
             }
-            if (router == 0 && get_cmdline("net.switch", sp100, 0x80) != NULL && strncmp(sp100, "openwrt", 0x7) == 0) {
-                //  router mode by bootargs
-                router = 1;
-                unlink("./.ottwifi");
-                fputs("===== Router mode ===== ", stderr);
-            }
             // 0x00401010
             int debuggable = 1;
-            char *cs = get_cmdline("console.switch", sp100, 0x80);
-            if (cs != NULL && strncmp(cs, "openwrt", 0x7) == 0) {
+            if (console == CONSOLE_OPENWRT) {
                 //  set ro.debuggable=0;
                 debuggable = 0;
+                redirect_stdio_to_android_null();
             }
             // else {
             //     //  set ro.debuggable=1;
@@ -117,11 +158,7 @@ int main(int argc, char **argv, char **envp) {
                 }
                 usleep(100000);
             }
-            if (router == 0) { // 0x004010a4
-                // 0x00401284 - 0x0040129c
-                close(open("./.ottwifi", O_CLOEXEC|O_CREAT|O_WRONLY));
-                // 0x004012a0 // end if
-            } else {
+            if (router) {
                 // router mode init
                 // 0x004010a8 - 0x401280
                 // sp+0x78 = 0*8;
@@ -155,7 +192,7 @@ int main(int argc, char **argv, char **envp) {
                 // }
 
                 // 0x401118
-                mount("proc", "/proc", "proc", MS_NOATIME|MS_NOEXEC|MS_NODEV|MS_NOSUID, NULL);
+                //mount("proc", "/proc", "proc", MS_NOATIME|MS_NOEXEC|MS_NODEV|MS_NOSUID, NULL);
                 mkdir(NET_NS_DIR, S_IRWXU|S_IRGRP|S_IXGRP|S_IROTH|S_IXOTH); // mode 0755
 
                 // ip netns add androidnet
@@ -184,20 +221,19 @@ int main(int argc, char **argv, char **envp) {
                 fd = open(sp180, 0);
                 setns(fd, CLONE_NEWNET);
                 close(fd);
-                umount("/proc");
+                //umount("/proc");
                 // 0x401280 : b 0x4012a0
             }
 
             // 0x004012a0
             unshare(CLONE_NEWNS|CLONE_NEWUTS);
             chroot(".");
-            exec_cmd = "/init";
+            return "/init";
             //return execv("/init", ["/init"]); // 0x4012bc
         }
     } else {
-        fputs("===== OpenWRT ===== ", stderr);
-        exec_cmd = OPENWRT_INIT;
+        fputs("===== OpenWRT ===== \n", stderr);
+        return OPENWRT_INIT;
         //return execv("/etc/preinit", ["/etc/preinit"]); // 0x4012bc
     }
-    EXEC(return, exec_cmd)
 }
