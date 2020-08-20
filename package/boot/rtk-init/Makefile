@@ -44,6 +44,7 @@ define Package/rtk-init/install
 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/init $(1)/etc/
 	$(INSTALL_DIR) $(1)/etc/init.d
 	$(INSTALL_BIN) ./files/android.init $(1)/etc/init.d/android
+	$(INSTALL_BIN) ./files/printk.init $(1)/etc/init.d/printk
 	$(INSTALL_DIR) $(1)/etc/uci-defaults
 	$(INSTALL_BIN) ./files/10_disable_services $(1)/etc/uci-defaults/
 	$(INSTALL_BIN) ./files/10_fix_service_status $(1)/etc/uci-defaults/
