@@ -115,6 +115,7 @@ clean_extroot() {
     mountpoint -q /tmp/extroot/overlay && umount /tmp/extroot/overlay
     rmdir /tmp/extroot/overlay
     rmdir /tmp/extroot
+    mountpoint -q /rom/dev && umount /rom/dev
 }
 
 do_mount_overlayfs() {
