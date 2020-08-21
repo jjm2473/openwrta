@@ -4,30 +4,29 @@
 START=01
 
 boot() {
-	if ! [ -n "$ANDROID" ]; then
-		rm /etc/resolv.conf
-		ln -s /tmp/resolv.conf /etc/resolv.conf
-		return 0
+	if [ -n "$ANDROID" ]; then
+		# notify android continue
+		touch /android/.coldplug_done
+		touch /rom/android/.coldplug_done
+		# let others know we are running with android
+		touch /tmp/.android
+		chmod 444 /tmp/.android
+		if [ -f /rom/android/.ottwifi ]; then
+			# dns will be configured by android through rpcd-mod-file
+			rm /etc/resolv.conf
+			touch /etc/resolv.conf
+			chmod 644 /etc/resolv.conf
+			# wait wifi
+			for i in `seq 1 30`; do
+				if [ -d /sys/class/ieee80211/phy0 ]; then
+					break
+				fi
+				sleep 1
+			done
+			return 0
+		fi
 	fi
 
-	# notify android continue
-	touch /android/.coldplug_done
-	touch /rom/android/.coldplug_done
-
-	# let others know we are running with android
-	touch /tmp/.android
-	chmod 444 /tmp/.android
-
-	# dns will be configured by android through rpcd-mod-file
 	rm /etc/resolv.conf
-	touch /etc/resolv.conf
-	chmod 644 /etc/resolv.conf
-
-	# wait wifi
-	for i in `seq 1 30`; do
-		if [ -d /sys/class/ieee80211/phy0 ]; then
-			break
-		fi
-		sleep 1
-	done
+	ln -s /tmp/resolv.conf /etc/resolv.conf
 }

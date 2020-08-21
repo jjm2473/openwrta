@@ -35,6 +35,7 @@ reload_service() {
 }
 
 stop_service() {
+	[ -f /rom/android/.ottwifi ] && return
 	/sbin/wifi down
 	ifdown -a
 	sleep 1

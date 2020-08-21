@@ -4,6 +4,8 @@
 . /lib/functions.sh
 . /lib/netifd/netifd-proto.sh
 
+PIDFILE=/var/run/dns-$interface.pid
+
 set_classless_routes() {
 	local max=128
 	while [ -n "$1" -a -n "$2" -a $max -gt 0 ]; do
@@ -14,6 +16,7 @@ set_classless_routes() {
 }
 
 setup_interface () {
+	logger -t dns.script setup $INTERFACE $interface
 	for i in `seq 1 12`; do
 		sleep 1
 		if ifconfig $interface | grep -q 'inet addr:'; then
@@ -74,6 +77,7 @@ setup_interface () {
 }
 
 deconfig_interface() {
+	logger -t dns.script deconfig $INTERFACE $interface
 	proto_init_update "*" 0 true
 	proto_send_update "$INTERFACE"
 }
@@ -83,11 +87,19 @@ case "$1" in
 		deconfig_interface
 	;;
 	renew|bound)
+		echo $$ > $PIDFILE
 		setup_interface
+		rm -f $PIDFILE
+	;;
+	reload)
+		deconfig_interface
+		echo $$ > $PIDFILE
+		setup_interface
+		while true; do
+			:
+		done
+		rm -f $PIDFILE
 	;;
 esac
-
-# user rules
-[ -f /etc/udhcpc.user ] && . /etc/udhcpc.user "$@"
 
 exit 0
