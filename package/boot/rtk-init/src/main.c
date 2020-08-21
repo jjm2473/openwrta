@@ -80,7 +80,7 @@ static char *prepare(char **argv) {
         putenv("PATH=/usr/sbin:/usr/bin:/sbin:/bin");
 
         snprintf(sp180, 0x80, "cp -a /mnt/android/* %s", ANDROID_ROOT);
-        if (system(sp180) < 0) {
+        if (system(sp180) < 0 || chdir(ANDROID_ROOT) < 0) {
             fputs("Copy Android rootfs failed!\nBoot Openwrt only!\n", stderr);
             umount(ANDROID_ROOT);
             return OPENWRT_INIT;
@@ -105,6 +105,7 @@ static char *prepare(char **argv) {
         // Openwrt + Android
         pid_t cpid = fork(); // 0x400f48
         if (cpid == 0) {
+            chdir("/");
             // openwrt init
             // 0x400f54
             setsid();
@@ -124,12 +125,6 @@ static char *prepare(char **argv) {
             }
         } else {
             // android init
-            // 0x400fa4
-            if (chdir(ANDROID_ROOT) < 0) {
-                // 0x00400ffc: movz w0, 0x1
-                // b 0x4012c8
-                return 1;
-            }
             // 0x00401010
             int debuggable = 1;
             if (console == CONSOLE_OPENWRT) {

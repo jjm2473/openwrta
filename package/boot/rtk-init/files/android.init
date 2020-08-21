@@ -16,13 +16,6 @@ boot() {
 			rm /etc/resolv.conf
 			touch /etc/resolv.conf
 			chmod 644 /etc/resolv.conf
-			# wait wifi
-			for i in `seq 1 30`; do
-				if [ -d /sys/class/ieee80211/phy0 ]; then
-					break
-				fi
-				sleep 1
-			done
 			return 0
 		fi
 	fi
