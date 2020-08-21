@@ -95,9 +95,8 @@ case "$1" in
 		deconfig_interface
 		echo $$ > $PIDFILE
 		setup_interface
-		while true; do
-			:
-		done
+		lock /var/lock/dns_$interface.lock
+		lock -w /var/lock/dns_$interface.lock
 		rm -f $PIDFILE
 	;;
 esac

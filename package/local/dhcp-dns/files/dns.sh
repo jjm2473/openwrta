@@ -96,11 +96,12 @@ proto_dns_renew() {
 proto_dns_teardown() {
 	logger -t dns.sh teardown $1 $2
 	if [ -f /android/.ottwifi -o -f /rom/android/.ottwifi ]; then
+		lock -u /var/lock/dns_$2.lock
 		proto_kill_command "$1" `kill -l SIGINT`
 		local PIDFILE=/var/run/dns-$2.pid
 		if [ -f $PIDFILE ]; then
 			local PID=`cat $PIDFILE`
-			kill -s SIGINT $PID
+			kill -s SIGINT -$PID
 			while kill -0 $PID; do
 				sleep 1
 			done
