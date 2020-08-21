@@ -15,6 +15,7 @@ start() {
 	stop
 	[ "$enabled" == "1" ] || exit 0
 	mkdir -p "${download_dir}"
+	export HOME=/root
 	baidupcs-web config set                         \
 	--savedir               "${download_dir}"       \
 	--max_download_rate     "${max_download_rate}"  \
