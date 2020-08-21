@@ -40,6 +40,7 @@ menuconfig RTK_NAS_PACKAGES
 		select LUCI_LANG_zh-cn
 		select PACKAGE_luci-theme-material
 		select PACKAGE_luci-proto-dns
+		select PACKAGE_luci-app-uhttpd
 		help
 		  Enalbe Luci
 

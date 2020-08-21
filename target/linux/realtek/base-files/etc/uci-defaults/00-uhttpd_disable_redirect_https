@@ -1,0 +1,8 @@
+#!/bin/sh
+
+if [ "`uci -q get uhttpd.main.redirect_https`" == "1" ]; then
+	uci set uhttpd.main.redirect_https=0
+	uci commit uhttpd
+fi
+
+exit 0
