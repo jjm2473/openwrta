@@ -20,6 +20,8 @@ env:
   UPLOAD_FIRMWARE: true
   UPLOAD_COWTRANSFER: true
   UPLOAD_WETRANSFER: false
+  CDN: jjm2473/cdn
+  REPO_VERSION: 18.06.8
   TZ: Asia/Shanghai
 
 jobs:
@@ -127,11 +129,12 @@ jobs:
 
     - name: Organize files
       id: organize
-      if: env.UPLOAD_FIRMWARE == 'true' && !cancelled()
+      if: steps.compile.outputs.status == 'success' && !cancelled()
       run: |
         cd openwrt/bin/targets/*/*
         rm -rf packages
         echo "::set-env name=FIRMWARE::$PWD"
+        echo "::set-env name=TARGET_DIR::$(echo $PWD | sed 's#^.*/openwrt/bin/##')"
         echo "::set-output name=status::success"
 
     - name: Upload firmware directory
@@ -155,3 +158,25 @@ jobs:
         ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
         echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
 
+    - name: Fetch CDN
+        uses: actions/checkout@v2
+        if: steps.organize.outputs.status == 'success' && env.CDN != '' && !cancelled()
+        with:
+          repository: ${{env.CDN}}
+          fetch-depth: 2
+          path: cdn
+
+    - name: Push CDN
+        if: steps.organize.outputs.status == 'success' && env.CDN != '' && !cancelled()
+        run: |
+          git config --global user.name "Actions"
+          git config --global user.email "actions@github.com"
+          [ -f cdn/.reset ] && git -C cdn reset HEAD^
+          mkdir -p cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}
+          cat ${FIRMWARE}/sha256sums >> cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}/sha256sums
+          rm -f ${FIRMWARE}/sha256sums
+          tar -cC ${FIRMWARE} . | tar -xC cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}
+          cp -a openwrt/bin/packages cdn/openwrt/release/${REPO_VERSION}/
+          git -C cdn add -all
+          git -C cdn commit -m 'release'
+          git -C cdn push `[ -f cdn/.reset ] && echo -f`
