@@ -8,19 +8,29 @@ SSD=start-stop-daemon
 
 DAAPD_CONF='/etc/forked-daapd.conf'
 
+add_path() {
+    echo -n , \"$1\"
+}
+
 start_instance() {
     local enabled
     local name
+    local port
     local path
     local db_path
     local dirpath
 
+    stop
     config_get enabled $1 enabled
-    config_get name $1 name
-    config_get path $1 path
-    config_get db_path $1 db_path
+    [ "$enabled" -gt 0 ] || return 0
 
-    sed -i '/directories =/c\	directories = "'$path'"' $DAAPD_CONF
+    config_get name $1 name '%h'
+    config_get port $1 port 3689
+    path=`config_list_foreach "$1" "path" add_path | dd bs=1 skip=1 2>/dev/null`
+    config_get db_path $1 db_path /var/cache/forked-daapd/songs3.db
+
+    sed -i '/^[^#] *port =/c\	port = '$port $DAAPD_CONF
+    sed -i '/directories =/c\	directories = {'"$path"'}' $DAAPD_CONF
     sed -i '/db_path =/c\	db_path = "'$db_path'"' $DAAPD_CONF
     name=${name// /\\\\s}
     sed -i '/^[^#] *name =/c\	name = "'$name'"' $DAAPD_CONF
@@ -33,10 +43,7 @@ start_instance() {
        chown daapd.aid_inet $dirpath
     fi
 
-    stop
-    if [ "$enabled" -gt 0 ];then
-      $SSD -p $PID -S -x $BIN -- -P $PID </dev/null >/dev/null 2>&1
-    fi
+    $SSD -p $PID -S -x $BIN -- -P $PID </dev/null >/dev/null 2>&1
 }
 
 start() {
