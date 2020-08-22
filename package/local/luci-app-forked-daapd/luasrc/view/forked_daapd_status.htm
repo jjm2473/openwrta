@@ -1,0 +1,30 @@
+<!-- 
+	Copyright (C) 2020 KFERMercer <KFER.Mercer@gmail.com>
+	THIS IS FREE SOFTWARE, LICENSED UNDER GPLv3.
+ -->
+
+<script type="text/javascript">//<![CDATA[
+XHR.poll(5, '<%=url([[admin]], [[nas]], [[forked_daapd]], [[status]])%>', null,
+	function(x, data) {
+		var tb = document.getElementById('forked_daapd_status');
+
+		if (data && tb) {
+			if (data.running) {
+				var port = window.document.getElementById("cbid.forked-daapd.config.port").value
+				var links = '<em><b><font color=green>iTunes (DAAP) server <%:RUNNING%></font></b></em><input class="cbi-button mar-10" type="button" value="<%:Open Web Interface%>" onclick="window.open(\'http://' + window.location.hostname + ':' + port + '/\')" />';
+				tb.innerHTML = links;
+			} else {
+				tb.innerHTML = '<em><b><font color=red>iTunes (DAAP) server <%:NOT RUNNING%></font></b></em>';
+			}
+		}
+	}
+);
+
+//]]>
+</script>
+<style>.mar-10 {margin-left: 50px; margin-right: 10px;}</style>
+<fieldset class="cbi-section">
+	<p id="forked_daapd_status">
+		<em><%:Collecting data...%></em>
+	</p>
+</fieldset>
