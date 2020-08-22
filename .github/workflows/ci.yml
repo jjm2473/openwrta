@@ -177,6 +177,6 @@ jobs:
         rm -f ${FIRMWARE}/sha256sums
         tar -cC ${FIRMWARE} . | tar -xC cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}
         cp -a openwrt/bin/packages cdn/openwrt/release/${REPO_VERSION}/
-        git -C cdn add -all
+        git -C cdn add --all
         git -C cdn commit -m 'release'
         git -C cdn push `[ -f cdn/.reset ] && echo -f`
