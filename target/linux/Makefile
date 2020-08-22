@@ -20,6 +20,7 @@ $(STAGING_DIR_HOST)/include/asm/.ready: $(STAGING_DIR_HOST)/include/asm/types.h 
 	touch $(STAGING_DIR_HOST)/include/asm/.ready
 else
 $(STAGING_DIR_HOST)/include/asm/.ready:
+	mkdir -p $(STAGING_DIR_HOST)/include/asm
 	echo 'Not darwin' > $(STAGING_DIR_HOST)/include/asm/.ready
 endif
 
