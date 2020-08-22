@@ -36,147 +36,148 @@ jobs:
       CONFIG_FILE: "${{ matrix.target }}.config"
       FALLBACK_DEVICE_NAME: "${{ matrix.target }}"
     steps:
-    - name: Checkout
-      uses: actions/checkout@main
-      with:
-        path: 'openwrt'
+      - name: Checkout
+        uses: actions/checkout@main
+        with:
+          path: 'openwrt'
 
-    - name: Bump config
-      run: |
-        tar -c -C openwrt/.github/workflows . | tar -x
-        ls ./
-        rm -rf openwrt/.github/workflows
+      - name: Bump config
+        run: |
+          tar -c -C openwrt/.github/workflows . | tar -x
+          ls ./
+          rm -rf openwrt/.github/workflows
 
-    - name: Initialization environment
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        sudo swapoff /swapfile || true
-        sudo rm -rf /swapfile /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
-        sudo -E apt-get -qq update
-        sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs gcc-multilib g++-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler antlr3 gperf
-        sudo -E apt-get -qq install default-jre
-        sudo -E apt-get -qq autoremove --purge
-        sudo -E apt-get -qq clean
-        sudo timedatectl set-timezone "$TZ"
-        # curl -fsSL https://raw.githubusercontent.com/P3TERX/dotfiles/master/.bashrc >> ~/.bashrc
+      - name: Initialization environment
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo swapoff /swapfile || true
+          sudo rm -rf /swapfile /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo -E apt-get -qq update
+          sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs gcc-multilib g++-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler antlr3 gperf
+          sudo -E apt-get -qq install default-jre
+          sudo -E apt-get -qq autoremove --purge
+          sudo -E apt-get -qq clean
+          sudo timedatectl set-timezone "$TZ"
+          # curl -fsSL https://raw.githubusercontent.com/P3TERX/dotfiles/master/.bashrc >> ~/.bashrc
 
-    - name: Load custom feeds
-      run: |
-        [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
-        chmod +x $DIY_P1_SH
-        cd openwrt
-        ../$DIY_P1_SH
+      - name: Load custom feeds
+        run: |
+          [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+          chmod +x $DIY_P1_SH
+          cd openwrt
+          ../$DIY_P1_SH
 
-    - name: Update feeds
-      run: cd openwrt && ./scripts/feeds update -a
+      - name: Update feeds
+        run: cd openwrt && ./scripts/feeds update -a
 
-    - name: Overwrite
-      run: |
-        [ -e overwrite ] && (tar -c -C overwrite . | tar -x -C openwrt)
+      - name: Overwrite
+        run: |
+          [ -e overwrite ] && (tar -c -C overwrite . | tar -x -C openwrt)
 
-    - name: Update feeds index
-      run: cd openwrt && ./scripts/feeds update -ai
+      - name: Update feeds index
+        run: cd openwrt && ./scripts/feeds update -ai
 
-    - name: Install feeds
-      run: cd openwrt && ./scripts/feeds install -a
+      - name: Install feeds
+        run: cd openwrt && ./scripts/feeds install -a
 
-    - name: Load custom configuration
-      run: |
-        [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
-        chmod +x $DIY_P2_SH
-        cd openwrt
-        ../$DIY_P2_SH
+      - name: Load custom configuration
+        run: |
+          [ -e $CONFIG_FILE ] && mv $CONFIG_FILE openwrt/.config
+          chmod +x $DIY_P2_SH
+          cd openwrt
+          ../$DIY_P2_SH
 
-    - name: SSH connection to Actions
-      uses: P3TERX/debugger-action@master
-      if: env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh')
+      - name: SSH connection to Actions
+        uses: P3TERX/debugger-action@master
+        if: env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh')
 
-    - name: Download package
-      id: package
-      run: |
-        cd openwrt
-        make defconfig
-        make download -j8
-        find dl -size -1024c -exec ls -l {} \;
-        find dl -size -1024c -exec rm -f {} \;
+      - name: Download package
+        id: package
+        run: |
+          cd openwrt
+          make defconfig
+          make download -j8
+          find dl -size -1024c -exec ls -l {} \;
+          find dl -size -1024c -exec rm -f {} \;
 
-    - name: Compile the firmware
-      id: compile
-      run: |
-        cd openwrt
-        echo -e "$(nproc) thread compile"
-        make -j$(nproc) || make -j1 || make -j1 V=s 2>&1 | tee /tmp/openwrt-build.log
-        echo "::set-output name=status::success"
-        grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-        [ -s DEVICE_NAME ] && echo "::set-env name=DEVICE_NAME::_$(cat DEVICE_NAME)" || echo "::set-env name=DEVICE_NAME::_${FALLBACK_DEVICE_NAME}"
-        echo "::set-env name=FILE_DATE::_$(date +"%Y%m%d%H%M")"
+      - name: Compile the firmware
+        id: compile
+        run: |
+          cd openwrt
+          echo -e "$(nproc) thread compile"
+          make -j$(nproc) || make -j1 || make -j1 V=s 2>&1 | tee /tmp/openwrt-build.log
+          echo "::set-output name=status::success"
+          grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
+          [ -s DEVICE_NAME ] && echo "::set-env name=DEVICE_NAME::_$(cat DEVICE_NAME)" || echo "::set-env name=DEVICE_NAME::_${FALLBACK_DEVICE_NAME}"
+          echo "::set-env name=FILE_DATE::_$(date +"%Y%m%d%H%M")"
 
-    - name: Last fail log
-      if: failure()
-      run: tail -n 200 /tmp/openwrt-build.log
+      - name: Last fail log
+        if: failure()
+        run: tail -n 200 /tmp/openwrt-build.log
 
-    - name: Show Config
-      if: failure()
-      run: cat openwrt/.config
+      - name: Show Config
+        if: failure()
+        run: cat openwrt/.config
 
-    - name: Upload bin directory
-      uses: actions/upload-artifact@main
-      if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
-      with:
-        name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: openwrt/bin
+      - name: Upload bin directory
+        uses: actions/upload-artifact@main
+        if: steps.compile.outputs.status == 'success' && env.UPLOAD_BIN_DIR == 'true'
+        with:
+          name: OpenWrt_bin${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+          path: openwrt/bin
 
-    - name: Organize files
-      id: organize
-      if: steps.compile.outputs.status == 'success' && !cancelled()
-      run: |
-        cd openwrt/bin/targets/*/*
-        rm -rf packages
-        echo "::set-env name=FIRMWARE::$PWD"
-        echo "::set-env name=TARGET_DIR::$(echo $PWD | sed 's#^.*/openwrt/bin/##')"
-        echo "::set-output name=status::success"
+      - name: Organize files
+        id: organize
+        if: steps.compile.outputs.status == 'success' && !cancelled()
+        run: |
+          cd openwrt/bin/targets/*/*
+          rm -rf packages
+          echo "::set-env name=FIRMWARE::$PWD"
+          echo "::set-env name=TARGET_DIR::$(echo $PWD | sed 's#^.*/openwrt/bin/##')"
+          echo "::set-output name=status::success"
 
-    - name: Upload firmware directory
-      uses: actions/upload-artifact@main
-      if: steps.organize.outputs.status == 'success' && !cancelled()
-      with:
-        name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
-        path: ${{ env.FIRMWARE }}
+      - name: Upload firmware directory
+        uses: actions/upload-artifact@main
+        if: steps.organize.outputs.status == 'success' && !cancelled()
+        with:
+          name: OpenWrt_firmware${{ env.DEVICE_NAME }}${{ env.FILE_DATE }}
+          path: ${{ env.FIRMWARE }}
 
-    - name: Upload firmware to cowtransfer
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
-      run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
-        echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
+      - name: Upload firmware to cowtransfer
+        if: steps.organize.outputs.status == 'success' && env.UPLOAD_COWTRANSFER == 'true' && !cancelled()
+        run: |
+          curl -fsSL git.io/file-transfer | sh
+          ./transfer cow --block 2621440 -s -p 64 --no-progress ${FIRMWARE} 2>&1 | tee cowtransfer.log
+          echo "::warning file=cowtransfer.com::$(cat cowtransfer.log | grep https)"
 
-    - name: Upload firmware to WeTransfer
-      if: steps.organize.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
-      run: |
-        curl -fsSL git.io/file-transfer | sh
-        ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
-        echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
+      - name: Upload firmware to WeTransfer
+        if: steps.organize.outputs.status == 'success' && env.UPLOAD_WETRANSFER == 'true' && !cancelled()
+        run: |
+          curl -fsSL git.io/file-transfer | sh
+          ./transfer wet -s -p 16 --no-progress ${FIRMWARE} 2>&1 | tee wetransfer.log
+          echo "::warning file=wetransfer.com::$(cat wetransfer.log | grep https)"
 
-    - name: Fetch CDN
-      uses: actions/checkout@v2
-      if: steps.organize.outputs.status == 'success' && env.CDN != '' && !cancelled()
-      with:
-        repository: ${{env.CDN}}
-        fetch-depth: 2
-        path: cdn
+      - name: Fetch CDN
+        uses: actions/checkout@v2
+        if: steps.organize.outputs.status == 'success' && env.CDN != '' && !cancelled()
+        with:
+          token: ${{ secrets.CDN_TOKEN }}
+          repository: ${{ env.CDN }}
+          fetch-depth: 2
+          path: cdn
 
-    - name: Push CDN
-      if: steps.organize.outputs.status == 'success' && env.CDN != '' && !cancelled()
-      run: |
-        git config --global user.name "Actions"
-        git config --global user.email "actions@github.com"
-        [ -f cdn/.reset ] && git -C cdn reset HEAD^
-        mkdir -p cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}
-        cat ${FIRMWARE}/sha256sums >> cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}/sha256sums
-        rm -f ${FIRMWARE}/sha256sums
-        tar -cC ${FIRMWARE} . | tar -xC cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}
-        cp -a openwrt/bin/packages cdn/openwrt/release/${REPO_VERSION}/
-        git -C cdn add --all
-        git -C cdn commit -m 'release'
-        git -C cdn push `[ -f cdn/.reset ] && echo -f`
+      - name: Push CDN
+        if: steps.organize.outputs.status == 'success' && env.CDN != '' && !cancelled()
+        run: |
+          git config --global user.name "Actions"
+          git config --global user.email "actions@github.com"
+          [ -f cdn/.reset ] && git -C cdn reset HEAD^
+          mkdir -p cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}
+          cat ${FIRMWARE}/sha256sums >> cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}/sha256sums
+          rm -f ${FIRMWARE}/sha256sums
+          tar -cC ${FIRMWARE} . | tar -xC cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}
+          cp -a openwrt/bin/packages cdn/openwrt/release/${REPO_VERSION}/
+          git -C cdn add --all
+          git -C cdn commit -m 'release'
+          git -C cdn push `[ -f cdn/.reset ] && echo -f`
