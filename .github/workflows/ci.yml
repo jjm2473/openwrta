@@ -186,7 +186,7 @@ jobs:
           sed -i '/ *config.seed$/d' ${FIRMWARE}/sha256sums.new
           mv ${FIRMWARE}/config.seed ${FIRMWARE}/$CONFIG_FILE
           
-          for i in seq 1 2; do
+          for first in true false; do
             [ -f cdn/.reset ] && git -C cdn reset HEAD^
             mkdir -p cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}
             cat ${FIRMWARE}/sha256sums.new >> cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}/sha256sums
@@ -195,5 +195,11 @@ jobs:
             cp -a openwrt/bin/packages cdn/openwrt/release/${REPO_VERSION}/
             git -C cdn add --all
             git -C cdn commit -m 'release'
-            git -C cdn push `[ -f cdn/.reset ] && echo -f` || ( git -C cdn reset --hard HEAD^ && git -C cdn pull )
+            if git -C cdn push `[ -f cdn/.reset ] && echo -f`; then
+              break
+            elif $first; then
+              git -C cdn reset --hard HEAD^ && git -C cdn pull
+            else
+              exit -1
+            fi
           done
