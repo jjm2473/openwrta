@@ -93,7 +93,7 @@ jobs:
         if: env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh')
 
       - name: Write build key
-        if: secrets.BUILD_KEY != '' && secrets.BUILD_KEY_PUB != ''
+        if: env.BUILD_KEY != '' && env.BUILD_KEY_PUB != ''
         env:
           BUILD_KEY: ${{ secrets.BUILD_KEY }}
           BUILD_KEY_PUB: ${{ secrets.BUILD_KEY_PUB }}
