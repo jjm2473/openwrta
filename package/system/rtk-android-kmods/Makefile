@@ -16,7 +16,7 @@ PKG_SOURCE_URL:=https://github.com/jjm2473/realtek-android-kmod/releases/downloa
 ifeq ("$(PKG_VERSION)","4.1.35-04005-g6c2818e-dirty")
 	PKG_HASH:=583c184bf0b41fff38b1784b3d49d42e4c684feffc23cfaeb5ecf19589647266
 else
-    # 4.1.17-g9100299-dirty
+	# 4.1.17-g9100299-dirty
 	PKG_HASH:=94478ac5b37e44f396e71d7160b72eb5454bad5cd94446c430bac31a585751d0
 endif
 
@@ -24,11 +24,14 @@ PKG_FLAGS:=hold essential nonshared
 include $(INCLUDE_DIR)/package.mk
 
 define Package/rtk-android-kmods
-  SECTION:=base
-  CATEGORY:=Base system
-  TITLE:=Realtek android kmods
-  DEPENDS:=@TARGET_realtek @RTK_ANDROID +base-files
-  ABI_VERSION:=$(PKG_VERSION)
+	SECTION:=base
+	CATEGORY:=Base system
+	TITLE:=Realtek android kmods
+	DEPENDS:=@TARGET_realtek @RTK_ANDROID +base-files \
+		+kmod-fuse \
+		+kmod-fs-cifs +kmod-fs-configfs +kmod-fs-cramfs +kmod-fs-exportfs +kmod-fs-isofs +kmod-fs-msdos +kmod-fs-nfs +kmod-fs-nfs-common +kmod-fs-nfs-common-rpcsec +kmod-fs-nfs-v4 +kmod-fs-nfsd +kmod-fs-squashfs +kmod-fs-udf +kmod-fs-vfat \
+		+kmod-dm +kmod-md-mod +kmod-md-raid0 +kmod-md-raid1 +kmod-md-raid10 +kmod-md-raid456 +kmod-md-linear +kmod-md-multipath
+	ABI_VERSION:=$(PKG_VERSION)
 endef
 
 define Download/rtk-android-kmods
