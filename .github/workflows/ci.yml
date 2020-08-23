@@ -92,6 +92,16 @@ jobs:
         uses: P3TERX/debugger-action@master
         if: env.SSH_ACTIONS == 'true' || contains(github.event.action, 'ssh')
 
+      - name: Write build key
+        if: secrets.BUILD_KEY != '' && secrets.BUILD_KEY_PUB != ''
+        env:
+          BUILD_KEY: ${{ secrets.BUILD_KEY }}
+          BUILD_KEY_PUB: ${{ secrets.BUILD_KEY_PUB }}
+        run: |
+          cd openwrt
+          echo -e "$BUILD_KEY" > key-build
+          echo -e "$BUILD_KEY_PUB" > key-build.pub
+
       - name: Download package
         id: package
         run: |
