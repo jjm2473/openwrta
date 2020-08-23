@@ -182,12 +182,18 @@ jobs:
         run: |
           git config --global user.name "Actions"
           git config --global user.email "actions@github.com"
-          [ -f cdn/.reset ] && git -C cdn reset HEAD^
-          mkdir -p cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}
-          cat ${FIRMWARE}/sha256sums >> cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}/sha256sums
-          rm -f ${FIRMWARE}/sha256sums
-          tar -cC ${FIRMWARE} . | tar -xC cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}
-          cp -a openwrt/bin/packages cdn/openwrt/release/${REPO_VERSION}/
-          git -C cdn add --all
-          git -C cdn commit -m 'release'
-          git -C cdn push `[ -f cdn/.reset ] && echo -f`
+          mv ${FIRMWARE}/sha256sums ${FIRMWARE}/sha256sums.new
+          sed -i '/ *config.seed$/d' ${FIRMWARE}/sha256sums.new
+          mv ${FIRMWARE}/config.seed ${FIRMWARE}/$CONFIG_FILE
+          
+          for i in seq 1 2; do
+            [ -f cdn/.reset ] && git -C cdn reset HEAD^
+            mkdir -p cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}
+            cat ${FIRMWARE}/sha256sums.new >> cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}/sha256sums
+            tar -cC ${FIRMWARE} . | tar -xC cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}
+            rm -f cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}/sha256sums.new
+            cp -a openwrt/bin/packages cdn/openwrt/release/${REPO_VERSION}/
+            git -C cdn add --all
+            git -C cdn commit -m 'release'
+            git -C cdn push `[ -f cdn/.reset ] && echo -f` || ( git -C cdn reset --hard HEAD^ && git -C cdn pull )
+          done
