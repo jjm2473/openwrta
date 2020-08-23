@@ -9,7 +9,7 @@ PROG=/usr/bin/$NAME
 
 validate_section_ttyd()
 {
-	uci_load_validate ttyd ttyd "$1" "$2" \
+	uci_validate_section ttyd ttyd "$1" \
 		'enable:bool:1' \
 		'port:port' \
 		'interface:string' \
@@ -36,7 +36,7 @@ validate_section_ttyd()
 
 ttyd_instance()
 {
-	[ "$2" = 0 ] || {
+	validate_section_ttyd "$1" || {
 		echo "validation failed"
 		return 1
 	}
@@ -89,7 +89,7 @@ ttyd_instance()
 
 start_service() {
 	config_load "$NAME"
-	config_foreach validate_section_ttyd ttyd ttyd_instance
+	config_foreach ttyd_instance ttyd
 }
 
 shutdown() {
