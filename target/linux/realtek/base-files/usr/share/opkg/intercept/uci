@@ -1,0 +1,13 @@
+#!/bin/sh
+
+case "x$1" in
+    xbatch|xcommit)
+        if [ -z "${IPKG_INSTROOT}" -a -n "${OPKG_INTERCEPT_DIR}" -a ! -f ${OPKG_INTERCEPT_DIR}/ucitrack_reload.sh ]; then
+            echo '#!/bin/sh' > ${OPKG_INTERCEPT_DIR}/ucitrack_reload.sh
+            echo '/etc/init.d/ucitrack enabled && /etc/init.d/ucitrack reload' >> ${OPKG_INTERCEPT_DIR}/ucitrack_reload.sh
+            chmod 755 ${OPKG_INTERCEPT_DIR}/ucitrack_reload.sh
+        fi
+    ;;
+esac
+
+exec /sbin/uci "$@"
