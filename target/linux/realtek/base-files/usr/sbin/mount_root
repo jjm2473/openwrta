@@ -11,12 +11,24 @@ mount_loop() {
         )
     fi
 
-    # check if there has enough free space before first partition
-    [ $((`partx -g -s -o START --nr 1:1 /dev/mmcblk0`>>11)) -gt 512 ] || return 1
+    # check if there is enough free space before first partition
+    local ENDMB=$((`partx -g -s -o START --nr 1:1 /dev/mmcblk0 || echo 0`>>11))
+    [ -n "$ENDMB" ] || return 1
+    [ $ENDMB -ge 260 ] || return 1
+    # align to 32MB
+    ENDMB=$((($ENDMB - 4) >> 5 << 5))
+    [ $ENDMB -ge 256 ] || return 1
 
-    local START=$((128*1024*1024))
-    local END=$((512*1024*1024))
+    if [ $ENDMB -gt 1024 ]; then
+        echo "first partition start after ${ENDMB} MB, greater than 1024, maybe something wrong, jump out"
+        return 1
+    fi
+
+    local START=$((128 << 20))
+    local END=$(($ENDMB << 20))
     local SIZE=$(($END - $START))
+
+    echo "overlay loop device end at ${ENDMB} MB at mmcblk0"
 
     local LOOPDEV=`echo "/mmcblk0 /dev/mmcblk0" | xargs -n1 losetup -n -O NAME --offset $START -j`
 
@@ -26,6 +38,7 @@ mount_loop() {
 
     if mount | grep -qw $LOOPDEV; then
         mount | grep -qw "$LOOPDEV on /overlay" && return 0
+        echo "overlay loop device $LOOPDEV already mounted, but not at /overlay"
         return 1
     fi
 
@@ -34,8 +47,12 @@ mount_loop() {
     mount -t ext4 $LOOPDEV /overlay && return 0
 
     # $LOOPDEV already has filesystem, maybe broken or something, dont touch it
-    [ -n "`block info $LOOPDEV`" ] && return 1
+    if [ -n "`block info $LOOPDEV`" ]; then
+        echo "overlay loop device $LOOPDEV already has filesystem, but mount as ext4 failed"
+        return 1
+    fi
 
+    echo "overlay loop device $LOOPDEV has no filesystem, create ext4 at it"
     mkfs.ext4 -L XXXNASETC $LOOPDEV
     sync
     mount -t ext4 $LOOPDEV /overlay && return 0
@@ -61,6 +78,7 @@ mount_nasetc() {
 }
 
 mount_ram() {
+    echo "WARN: could not mount overlay from emmc, mount tmpfs as fallback"
     mount -t tmpfs -o noatime,mode=0755 tmpfs /overlay
 }
 
@@ -132,7 +150,7 @@ do_mount_overlayfs() {
         mount --move /rom/sys /sys
         mount --move /rom/overlay /overlay
 
-        clean_extroot
+        clean_extroot >/dev/null 2>&1
     fi
 }
 
