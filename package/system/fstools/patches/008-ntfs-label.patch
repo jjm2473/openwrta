@@ -1,0 +1,34 @@
+--- a/libblkid-tiny/ntfs.c
++++ b/libblkid-tiny/ntfs.c
+@@ -82,14 +82,12 @@ enum {
+ static int probe_ntfs(blkid_probe pr, const struct blkid_idmag *mag)
+ {
+ 	struct ntfs_super_block *ns;
+-#if 0
+ 	struct master_file_table_record *mft;
+-#endif
+ 
+ 	uint32_t sectors_per_cluster, mft_record_size;
+ 	uint16_t sector_size;
+ 	uint64_t volume_serial;
+-	uint64_t nr_clusters, off; //, attr_off;
++	uint64_t nr_clusters, off, attr_off;
+ 	unsigned char *buf_mft;
+ 
+ 	ns = blkid_probe_get_sb(pr, mag, struct ntfs_super_block);
+@@ -176,7 +174,6 @@ static int probe_ntfs(blkid_probe pr, co
+ 	if (memcmp(buf_mft, "FILE", 4))
+ 		return 1;
+ 
+-#if 0
+ 	mft = (struct master_file_table_record *) buf_mft;
+ 	attr_off = le16_to_cpu(mft->attrs_offset);
+ 
+@@ -206,7 +203,6 @@ static int probe_ntfs(blkid_probe pr, co
+ 
+ 		attr_off += attr_len;
+ 	}
+-#endif
+ 
+ 	blkid_probe_sprintf_uuid(pr,
+ 			(unsigned char *) &volume_serial,
