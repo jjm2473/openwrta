@@ -23,6 +23,7 @@ env:
   CDN: jjm2473/cdn
   REPO_VERSION: 18.06.8
   TZ: Asia/Shanghai
+  TARGET_WITH_MODULES: z9s
 
 jobs:
   build:
@@ -192,7 +193,7 @@ jobs:
             cat ${FIRMWARE}/sha256sums.new >> cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}/sha256sums
             tar -cC ${FIRMWARE} . | tar -xC cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}
             rm -f cdn/openwrt/release/${REPO_VERSION}/${TARGET_DIR}/sha256sums.new
-            cp -a openwrt/bin/packages cdn/openwrt/release/${REPO_VERSION}/
+            [ "$FALLBACK_DEVICE_NAME" == "$TARGET_WITH_MODULES" ] && cp -a openwrt/bin/packages cdn/openwrt/release/${REPO_VERSION}/
             git -C cdn add --all
             git -C cdn commit -m 'release'
             if git -C cdn push `[ -f cdn/.reset ] && echo -f`; then
