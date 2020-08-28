@@ -31,7 +31,8 @@ define Package/rtk-android-kmods
 		+kmod-fuse \
 		+kmod-fs-cifs +kmod-fs-configfs +kmod-fs-cramfs +kmod-fs-exportfs +kmod-fs-isofs +kmod-fs-msdos +kmod-fs-nfs +kmod-fs-nfs-common +kmod-fs-nfs-common-rpcsec +kmod-fs-nfs-v4 +kmod-fs-nfsd +kmod-fs-squashfs +kmod-fs-udf +kmod-fs-vfat \
 		+kmod-dm +kmod-md-mod +kmod-md-raid0 +kmod-md-raid1 +kmod-md-raid10 +kmod-md-raid456 +kmod-md-linear +kmod-md-multipath \
-		+kmod-gre +kmod-gre6 +kmod-ip6-tunnel +kmod-iptunnel +kmod-iptunnel6 +kmod-l2tp +kmod-l2tp-eth +kmod-l2tp-ip +kmod-tun +kmod-udptunnel4 +kmod-udptunnel6 +kmod-veth 
+		+kmod-gre +kmod-gre6 +kmod-ip6-tunnel +kmod-iptunnel +kmod-iptunnel6 +kmod-l2tp +kmod-l2tp-eth +kmod-l2tp-ip +kmod-tun +kmod-udptunnel4 +kmod-udptunnel6 +kmod-veth \
+		+kmod-ipt-ipset +kmod-ipt-quota2 +kmod-ipt-raw +kmod-ipt-raw6
 	ABI_VERSION:=$(PKG_VERSION)
 endef
 
