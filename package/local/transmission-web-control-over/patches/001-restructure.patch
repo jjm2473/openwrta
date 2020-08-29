@@ -1,0 +1,55 @@
+From f1a7f35865980dff91ca7f55aa2f9e21ed5ba03e Mon Sep 17 00:00:00 2001
+From: Liangbin Lian <jjm2473@gmail.com>
+Date: Fri, 28 Aug 2020 23:23:22 +0800
+Subject: [PATCH] restructure for better development
+
+(cherry picked from commit ad35c634cca7f0870b76993243184cc042bad0a9)
+---
+ src/index.html                                            | 4 ++--
+ src/index.mobile.html                                     | 2 +-
+ src/tr-web-control/script/{min => other}/clipboard.min.js | 0
+ src/tr-web-control/script/{min => other}/ua-parser.min.js | 0
+ 4 files changed, 3 insertions(+), 3 deletions(-)
+ rename src/tr-web-control/script/{min => other}/clipboard.min.js (100%)
+ rename src/tr-web-control/script/{min => other}/ua-parser.min.js (100%)
+
+diff --git a/src/index.html b/src/index.html
+index 4c804cc..5236666 100644
+--- a/src/index.html
++++ b/src/index.html
+@@ -28,9 +28,9 @@
+ 	<!-- -->
+ 	<!-- System class library -->
+ 	<script type="text/javascript" src="tr-web-control/script/min/FileSaver.min.js?v=20190724"></script>
+-	<script type="text/javascript" src="tr-web-control/script/min/clipboard.min.js"></script>
++	<script type="text/javascript" src="tr-web-control/script/other/clipboard.min.js"></script>
+ 	<script type="text/javascript" src="tr-web-control/script/min/public.min.js?v=20190724"></script>
+-	<script type="text/javascript" src="tr-web-control/script/min/ua-parser.min.js?v=20190724"></script>
++	<script type="text/javascript" src="tr-web-control/script/other/ua-parser.min.js?v=20190724"></script>
+ 	<script type="text/javascript" src="tr-web-control/script/min/transmission.min.js?v=20190724"></script>
+ 	<script type="text/javascript" src="tr-web-control/script/min/transmission.torrents.min.js?v=20171027"></script>
+ 	<script type="text/javascript" src="tr-web-control/script/min/system.min.js?v=20190724"></script>
+diff --git a/src/index.mobile.html b/src/index.mobile.html
+index 1f77f24..4073851 100644
+--- a/src/index.mobile.html
++++ b/src/index.mobile.html
+@@ -20,7 +20,7 @@
+ 	<!-- -->
+ 	<!-- System class library -->
+ 	<script type="text/javascript" src="tr-web-control/script/min/public.min.js?v=20180906"></script>
+-	<script type="text/javascript" src="tr-web-control/script/min/ua-parser.min.js?v=20170522"></script>
++	<script type="text/javascript" src="tr-web-control/script/other/ua-parser.min.js?v=20170522"></script>
+ 	<script type="text/javascript" src="tr-web-control/script/min/transmission.min.js?v=20180906"></script>
+ 	<script type="text/javascript" src="tr-web-control/script/min/transmission.torrents.min.js?v=20180906"></script>
+ 	<script type="text/javascript" src="tr-web-control/script/min/system.mobile.min.js?v=20180906"></script>
+diff --git a/src/tr-web-control/script/min/clipboard.min.js b/src/tr-web-control/script/other/clipboard.min.js
+similarity index 100%
+rename from src/tr-web-control/script/min/clipboard.min.js
+rename to src/tr-web-control/script/other/clipboard.min.js
+diff --git a/src/tr-web-control/script/min/ua-parser.min.js b/src/tr-web-control/script/other/ua-parser.min.js
+similarity index 100%
+rename from src/tr-web-control/script/min/ua-parser.min.js
+rename to src/tr-web-control/script/other/ua-parser.min.js
+-- 
+2.23.0
+
