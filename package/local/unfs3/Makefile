@@ -14,24 +14,20 @@ PKG_FIXUP:=autoreconf
 PKG_BUILD_PARALLEL:=1
 PKG_INSTALL:=1
 
-PKG_BUILD_DEPENDS:=rpcsvc-proto/host
+# PKG_BUILD_DEPENDS:=rpcsvc-proto/host
 
 include $(INCLUDE_DIR)/package.mk
 
-TARGET_CPPFLAGS := \
-	-I$(STAGING_DIR)/usr/include/tirpc \
-	$(TARGET_CPPFLAGS)
-
 TARGET_CFLAGS := $(TARGET_CPPFLAGS) $(TARGET_CFLAGS)
 
-CONFIGURE_ARGS += LIBS=-ltirpc
+CONFIGURE_ARGS += LIBS=-lrpc
 
 define Package/unfs3
 	SECTION:=net
 	CATEGORY:=Network
 	SUBMENU:=Filesystem
 	TITLE:=Userspace NFSv3 server
-	DEPENDS:=+libtirpc +rpcbind
+	DEPENDS:=+librpc +rpcbind
 	URL:=$(PKG_SOURCE_URL)
 	CONFLICTS:=nfs-kernel-server
 endef
