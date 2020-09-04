@@ -1,0 +1,20 @@
+--- a/Config/exports.l
++++ b/Config/exports.l
+@@ -50,6 +50,7 @@ OLDNET {IP}"/"{IP}
+ 
+ %option nounput
+ %option noinput
++%option noyywrap
+ 
+ %%
+ 
+--- a/Config/exports.y
++++ b/Config/exports.y
+@@ -496,6 +496,7 @@ name:
+ 	| IP			{ set_ipaddr($1); }
+ 	| NET			{ set_ipnet($1, TRUE); }
+ 	| OLDNET		{ set_ipnet($1, FALSE); }
++	| '*' 			{ }
+ 	;
+ 	
+ opts:
