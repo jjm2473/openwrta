@@ -20,7 +20,7 @@ start_service() {
 	touch $NFS_D/rmtab
 
 	mkdir -p $VAR_NFS
-	chown nfs:nfs $VAR_NFS
+	chown nfs:nfs $VAR_NFS $LOCK_D
 
 	sysctl -w fs.nfs.nlm_tcpport=32777 fs.nfs.nlm_udpport=32777 > /dev/null
 
