@@ -56,6 +56,7 @@ menuconfig RTK_NAS_PACKAGES
 			select RTK_NAS_SMB
 			select RTK_NAS_FTP
 			select RTK_NAS_AFP
+			select RTK_NAS_NFS
 			select RTK_NAS_DLNA
 			select RTK_NAS_DAAP
 			help
@@ -66,6 +67,7 @@ menuconfig RTK_NAS_PACKAGES
 			select RTK_NAS_SMB
 			select RTK_NAS_FTP
 			select RTK_NAS_AFP
+			select RTK_NAS_NFS
 			help
 			  Only file transfer services: SMB, FTP and AFP(Time Machine).
 
@@ -133,3 +135,11 @@ config RTK_NAS_DAAP
 	depends on RTK_NAS_PACKAGES
 	select PACKAGE_forked-daapd
 	select PACKAGE_luci-app-forked-daapd if RTK_NAS_LUCI
+
+config RTK_NAS_NFS
+	bool
+	depends on RTK_NAS_PACKAGES
+	select PACKAGE_nfs-kernel-server if TARGET_realtek_rtd129x_zidoo-z9s
+	select PACKAGE_nfs-kernel-server-utils if TARGET_realtek_rtd129x_zidoo-z9s
+	select PACKAGE_unfs3 if TARGET_realtek_rtd129x_zidoo-x9s
+	select PACKAGE_luci-app-nfs if RTK_NAS_LUCI
