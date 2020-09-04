@@ -9,7 +9,7 @@ LUCI_TITLE:=LuCI support for nfs
 LUCI_DEPENDS:=@(PACKAGE_nfs-kernel-server||PACKAGE_unfs3) +nfs-utils +mount-utils
 LUCI_PKGARCH:=all
 PKG_VERSION:=1.2
-PKG_RELEASE:=1
+PKG_RELEASE:=2
 
 define Package/luci-app-nfs/conffiles
 /etc/config/nfs
