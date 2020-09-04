@@ -25,10 +25,13 @@ nfs_share() {
         fi
     fi
     exportfs -r
+    [ -f /usr/sbin/unfsd ] && /etc/init.d/nfsd enabled && /etc/init.d/nfsd reload
 }
 
 nfs_share_stop() {
+    echo > /etc/exports
     exportfs -au &>/dev/null
+    [ -f /usr/sbin/unfsd ] && /etc/init.d/nfsd stop
 }
 
 nfs_mount() {
