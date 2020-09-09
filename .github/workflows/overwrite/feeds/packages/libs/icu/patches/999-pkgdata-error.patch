@@ -1,0 +1,56 @@
+--- a/tools/pkgdata/pkgdata.cpp
++++ b/tools/pkgdata/pkgdata.cpp
+@@ -1377,7 +1377,7 @@ static int32_t pkg_generateLibraryFile(c
+         if (cmd == NULL) {
+             length = uprv_strlen(pkgDataFlags[GENLIB]) + uprv_strlen(pkgDataFlags[LDICUDTFLAGS]) +
+                      ((uprv_strlen(targetDir) + uprv_strlen(libFileNames[LIB_FILE_VERSION_TMP])) * 2) +
+-                     uprv_strlen(objectFile) + uprv_strlen(pkgDataFlags[LD_SONAME]) +
++                     uprv_strlen(objectFile) + uprv_strlen(pkgDataFlags[LD_SONAME]) + 1 +
+                      uprv_strlen(pkgDataFlags[LD_SONAME][0] == 0 ? "" : libFileNames[LIB_FILE_VERSION_MAJOR]) +
+                      uprv_strlen(pkgDataFlags[RPATH_FLAGS]) + uprv_strlen(pkgDataFlags[BIR_FLAGS]) + BUFFER_PADDING_SIZE;
+ #if U_PLATFORM == U_PF_CYGWIN
+@@ -1392,7 +1392,7 @@ static int32_t pkg_generateLibraryFile(c
+             freeCmd = TRUE;
+         }
+ #if U_PLATFORM == U_PF_MINGW
+-        sprintf(cmd, "%s%s%s %s -o %s%s %s %s%s %s %s",
++        sprintf(cmd, "%s%s%s %s -o %s%s %s %s %s %s %s",
+                 pkgDataFlags[GENLIB],
+                 targetDir,
+                 libFileNames[LIB_FILE_MINGW],
+@@ -1400,7 +1400,7 @@ static int32_t pkg_generateLibraryFile(c
+                 targetDir,
+                 libFileNames[LIB_FILE_VERSION_TMP],
+ #elif U_PLATFORM == U_PF_CYGWIN
+-        sprintf(cmd, "%s%s%s %s -o %s%s %s %s%s %s %s",
++        sprintf(cmd, "%s%s%s %s -o %s%s %s %s %s %s %s",
+                 pkgDataFlags[GENLIB],
+                 targetDir,
+                 libFileNames[LIB_FILE_VERSION_TMP],
+@@ -1408,7 +1408,7 @@ static int32_t pkg_generateLibraryFile(c
+                 targetDir,
+                 libFileNames[LIB_FILE_CYGWIN_VERSION],
+ #elif U_PLATFORM == U_PF_AIX
+-        sprintf(cmd, "%s %s%s;%s %s -o %s%s %s %s%s %s %s",
++        sprintf(cmd, "%s %s%s;%s %s -o %s%s %s %s %s %s %s",
+                 RM_CMD,
+                 targetDir,
+                 libFileNames[LIB_FILE_VERSION_TMP],
+@@ -1417,7 +1417,7 @@ static int32_t pkg_generateLibraryFile(c
+                 targetDir,
+                 libFileNames[LIB_FILE_VERSION_TMP],
+ #else
+-        sprintf(cmd, "%s %s -o %s%s %s %s%s %s %s",
++        sprintf(cmd, "%s %s -o %s%s %s %s %s %s %s",
+                 pkgDataFlags[GENLIB],
+                 pkgDataFlags[LDICUDTFLAGS],
+                 targetDir,
+@@ -1478,7 +1478,7 @@ static int32_t pkg_generateLibraryFile(c
+                     "(",
+                     PDS_Name,
+                     ")'\"");
+-            sprintf(cmd, "%s %s -o %s %s %s%s %s %s",
++            sprintf(cmd, "%s %s -o %s %s %s %s %s %s",
+                    pkgDataFlags[GENLIB],
+                    pkgDataFlags[LDICUDTFLAGS],
+                    PDS_LibName,
