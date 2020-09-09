@@ -58,7 +58,7 @@ transmission() {
 	local incomplete_dir_enabled
 	config_get incomplete_dir_enabled "$cfg" 'incomplete_dir_enabled' 0
 	local mem_percentage
-	config_get mem_percentage "$cfg" 'mem_percentage' '50'
+	config_get mem_percentage "$cfg" 'mem_percentage' '30'
 	local config_overwrite
 	config_get config_overwrite "$cfg" config_overwrite 1
 	local nice
