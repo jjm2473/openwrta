@@ -117,8 +117,7 @@ jobs:
         run: |
           cd openwrt
           echo -e "$(nproc) thread compile"
-          set -o pipefail
-          make -j$(nproc) || make -j1 V=s 2>&1 | tee /tmp/openwrt-build.log
+          make -j$(nproc) || bash -c 'set -o pipefail ; make -j1 V=s 2>&1 | tee /tmp/openwrt-build.log'
           echo "::set-output name=status::success"
           grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
           [ -s DEVICE_NAME ] && echo "::set-env name=DEVICE_NAME::_$(cat DEVICE_NAME)" || echo "::set-env name=DEVICE_NAME::_${FALLBACK_DEVICE_NAME}"
