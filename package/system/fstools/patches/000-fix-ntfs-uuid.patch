@@ -12,11 +12,9 @@ Signed-off-by: Yousong Zhou <yszhou4tech@gmail.com>
  libblkid-tiny/ntfs.c | 12 +++++++-----
  1 file changed, 7 insertions(+), 5 deletions(-)
 
-diff --git a/libblkid-tiny/ntfs.c b/libblkid-tiny/ntfs.c
-index 3a9d5cb..2426e70 100644
 --- a/libblkid-tiny/ntfs.c
 +++ b/libblkid-tiny/ntfs.c
-@@ -88,6 +88,7 @@ static int probe_ntfs(blkid_probe pr, const struct blkid_idmag *mag)
+@@ -88,6 +88,7 @@ static int probe_ntfs(blkid_probe pr, co
  
  	uint32_t sectors_per_cluster, mft_record_size;
  	uint16_t sector_size;
@@ -24,7 +22,7 @@ index 3a9d5cb..2426e70 100644
  	uint64_t nr_clusters, off; //, attr_off;
  	unsigned char *buf_mft;
  
-@@ -148,15 +149,16 @@ static int probe_ntfs(blkid_probe pr, const struct blkid_idmag *mag)
+@@ -148,15 +149,16 @@ static int probe_ntfs(blkid_probe pr, co
  		return 1;
  
  
@@ -43,7 +41,7 @@ index 3a9d5cb..2426e70 100644
  
  	buf_mft = blkid_probe_get_buffer(pr, off, mft_record_size);
  	if (!buf_mft)
-@@ -207,9 +209,9 @@ static int probe_ntfs(blkid_probe pr, const struct blkid_idmag *mag)
+@@ -207,9 +209,9 @@ static int probe_ntfs(blkid_probe pr, co
  #endif
  
  	blkid_probe_sprintf_uuid(pr,
@@ -56,6 +54,3 @@ index 3a9d5cb..2426e70 100644
  	return 0;
  }
  
--- 
-2.23.0
-
