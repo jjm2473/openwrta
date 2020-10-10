@@ -120,8 +120,12 @@ jobs:
           make -j$(nproc) || bash -c 'set -o pipefail ; make -j1 V=s 2>&1 | tee /tmp/openwrt-build.log'
           echo "::set-output name=status::success"
           grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
-          [ -s DEVICE_NAME ] && echo "::set-env name=DEVICE_NAME::_$(cat DEVICE_NAME)" || echo "::set-env name=DEVICE_NAME::_${FALLBACK_DEVICE_NAME}"
-          echo "::set-env name=FILE_DATE::_$(date +"%Y%m%d%H%M")"
+          if [ -s DEVICE_NAME ]; then
+            echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
+          else
+            echo "DEVICE_NAME=_${FALLBACK_DEVICE_NAME}" >> $GITHUB_ENV
+          fi
+          echo "FILE_DATE=_$(date +"%Y%m%d%H%M")" >> $GITHUB_ENV
 
       - name: Last fail log
         if: failure()
@@ -144,8 +148,8 @@ jobs:
         run: |
           cd openwrt/bin/targets/*/*
           mv packages ../../../../tmp/
-          echo "::set-env name=FIRMWARE::$PWD"
-          echo "::set-env name=TARGET_DIR::$(echo $PWD | sed 's#^.*/openwrt/bin/##')"
+          echo "FIRMWARE=$PWD" >> $GITHUB_ENV
+          echo "TARGET_DIR=$(echo $PWD | sed 's#^.*/openwrt/bin/##')" >> $GITHUB_ENV
           echo "::set-output name=status::success"
 
       - name: Upload firmware directory
