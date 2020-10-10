@@ -32,8 +32,15 @@ mount_loop() {
 
     local LOOPDEV=`echo "/mmcblk0 /dev/mmcblk0" | xargs -n1 losetup -n -O NAME --offset $START -j`
 
-    [ -n "$LOOPDEV" ] || LOOPDEV=`losetup -L --offset $START --sizelimit $SIZE --show -f /dev/mmcblk0`
+    if [ -z "$LOOPDEV" ]; then
+        LOOPDEV=`losetup -L --offset $START --sizelimit $SIZE --show -f /dev/mmcblk0`
 
+        if [ "x$LOOPDEV" = "x/dev/loop0" ]; then
+                echo "skip /dev/loop0, which used by RTMediaPlayer mounting ISO file"
+                LOOPDEV=`losetup --offset $START --sizelimit $SIZE --show -f /dev/mmcblk0`
+                losetup -d /dev/loop0
+        fi
+    fi
     [ -n "$LOOPDEV" ] || return 1
 
     if mount | grep -qw $LOOPDEV; then
