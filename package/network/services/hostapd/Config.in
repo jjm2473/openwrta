@@ -85,12 +85,12 @@ config DRIVER_WEXT_SUPPORT
 
 config DRIVER_11N_SUPPORT
 	bool
-	default n
+	default y
 
 config DRIVER_11AC_SUPPORT
 	bool
-	default n
+	default y
 
 config DRIVER_11W_SUPPORT
 	bool
-	default n
+	default y
