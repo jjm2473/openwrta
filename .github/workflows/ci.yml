@@ -21,7 +21,7 @@ env:
   UPLOAD_COWTRANSFER: true
   UPLOAD_WETRANSFER: false
   CDN: jjm2473/cdn
-  REPO_VERSION: 18.06.8
+  REPO_VERSION: 18.06.9
   TZ: Asia/Shanghai
   TARGET_WITH_MODULES: z9s
 
