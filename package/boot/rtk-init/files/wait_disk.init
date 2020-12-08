@@ -1,0 +1,12 @@
+#!/bin/sh /etc/rc.common
+# 2020 jjm2473 porting openwrt 19.07+ to zidoo z9s
+
+START=39
+
+boot() {
+	if [ -n "$ANDROID" ]; then
+		echo "sleep 30 seconds, wait disk ready before fstab"
+		sleep 30
+		echo "wait disk done, continue boot"
+	fi
+}
