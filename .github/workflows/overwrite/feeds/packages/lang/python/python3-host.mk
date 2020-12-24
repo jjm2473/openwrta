@@ -41,11 +41,6 @@ define HostPython3
 	$(HOST_PYTHON3_BIN) $(2);
 endef
 
-HOST_LD_ARG_CONNECTOR:==
-ifeq ($(HOST_OS),Darwin)
-HOST_LD_ARG_CONNECTOR:=,
-endif
-
 define host_python3_settings
 	ARCH="$(HOST_ARCH)" \
 	CC="$(HOSTCC)" \
@@ -55,7 +50,7 @@ define host_python3_settings
 	LDSHARED="$(HOSTCC) -shared" \
 	CFLAGS="$(HOST_CFLAGS)" \
 	CPPFLAGS="$(HOST_CPPFLAGS) -I$(HOST_PYTHON3_INC_DIR)" \
-	LDFLAGS="$(HOST_LDFLAGS) -lpython$(PYTHON3_VERSION) -Wl$(comma)-rpath$(HOST_LD_ARG_CONNECTOR)$(STAGING_DIR_HOSTPKG)/lib" \
+	LDFLAGS="$(HOST_LDFLAGS) -lpython$(PYTHON3_VERSION) -Wl$(comma)-rpath$(comma)$(STAGING_DIR_HOSTPKG)/lib" \
 	_PYTHON_HOST_PLATFORM=linux2
 endef
 
