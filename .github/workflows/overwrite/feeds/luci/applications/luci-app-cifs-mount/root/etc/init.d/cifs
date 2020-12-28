@@ -43,7 +43,7 @@ mount_natshare() {
 	
 	mkdir -p $natpath && chmod 777 $natpath
 	#echo "mount -t cifs -o vers=$smbver,user=$users,password=$pwd,iocharset=$iocharset,$agm //$server/$name $natpath"
-	mount -t cifs -o vers=$smbver,user=$users,password=$pwd,iocharset=$iocharset,$agm //$server/$name $natpath
+	mount -t cifs -o vers=$smbver,username=$users,password=$pwd,iocharset=$iocharset,$agm "//$server/$name" $natpath
 }
 
 start() {
