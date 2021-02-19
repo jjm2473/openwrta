@@ -7,14 +7,14 @@
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=cmake
-PKG_VERSION:=3.11.4
-PKG_RELEASE:=2
+PKG_VERSION:=3.19.1
+PKG_RELEASE:=1
 PKG_CPE_ID:=cpe:/a:kitware:cmake
 
 PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz
-PKG_SOURCE_URL:=https://cmake.org/files/v3.11/ \
-		https://fossies.org/linux/misc/
-PKG_HASH:=8f864e9f78917de3e1483e256270daabc4a321741592c5b36af028e72bff87f5
+PKG_SOURCE_URL:=https://github.com/Kitware/CMake/releases/download/v$(PKG_VERSION)/ \
+		https://cmake.org/files/v3.19/
+PKG_HASH:=1d266ea3a76ef650cdcf16c782a317cb4a7aa461617ee941e389cb48738a3aba
 
 HOST_BUILD_PARALLEL:=1
 HOST_CONFIGURE_PARALLEL:=1
@@ -22,6 +22,8 @@ HOST_CONFIGURE_PARALLEL:=1
 include $(INCLUDE_DIR)/host-build.mk
 
 HOST_CONFIGURE_VARS += \
+	CC="$(HOSTCC_NOCACHE)" \
+	CXX="$(HOSTCXX_NOCACHE)" \
 	MAKEFLAGS="$(HOST_JOBS)" \
 	CXXFLAGS="$(HOST_CFLAGS)"
 
