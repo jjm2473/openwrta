@@ -102,11 +102,18 @@ mount_extroot() {
 prepare_mnt() {
     mount_loop || mount_nasetc || mount_ram || return 1
 
+    if [ -f /overlay/.reset ]; then
+        rm -rf /overlay/upper /overlay/work
+        rm -f /overlay/.reset
+        sync /overlay
+    fi
+
     if mount_extroot && mountpoint -q /tmp/extroot/mnt; then
         for dir in proc dev tmp sys overlay rom root; do
             mkdir -m 0755 /tmp/extroot/mnt/$dir
         done
         if mount --move /tmp/extroot/mnt /mnt; then
+            # writeable extroot existed, we don't need overlay
             umount /tmp/extroot/overlay
             return 0
         fi
@@ -114,31 +121,25 @@ prepare_mnt() {
     fi
 
     local lowerdir=/
+    local upperdir=/overlay/upper
     if mountpoint -q /tmp/extroot/overlay; then
+        # use ext overlay as upper layer
         mkdir -m 0755 -p /tmp/extroot/overlay/upper/layer1
-        mkdir -m 0755 /tmp/extroot/layer1
-        if mount --move /overlay /tmp/extroot/layer1; then
-            if mount --move /tmp/extroot/overlay /overlay; then
-                lowerdir=/tmp/extroot/layer1/upper:$lowerdir
-            else
-                umount /tmp/extroot/overlay
-                mount --move /tmp/extroot/layer1 /overlay
-            fi
-        fi
+        mkdir -m 0755 -p /overlay/upper/layer1
+        lowerdir=/overlay/upper:$lowerdir
+        upperdir=/tmp/extroot/overlay/upper
     fi
 
     mkdir -p /overlay/upper /overlay/work
-    mount -o noatime,lowerdir=$lowerdir,upperdir=/overlay/upper,workdir=/overlay/work -t overlay "overlayfs:/overlay" /mnt \
+    mount -o noatime,lowerdir=$lowerdir,upperdir=$upperdir,workdir=/overlay/work -t overlay "overlayfs:/overlay" /mnt \
         || return 1
 }
 
 clean_extroot() {
-    mountpoint -q /tmp/extroot/layer1 && mount --move /tmp/extroot/layer1 /layer1
-    rmdir /tmp/extroot/layer1
+    mountpoint -q /tmp/extroot/overlay && mount --move /tmp/extroot/overlay /layer1
+    rmdir /tmp/extroot/overlay
     mountpoint -q /tmp/extroot/mnt && umount /tmp/extroot/mnt
     rmdir /tmp/extroot/mnt
-    mountpoint -q /tmp/extroot/overlay && umount /tmp/extroot/overlay
-    rmdir /tmp/extroot/overlay
     rmdir /tmp/extroot
     mountpoint -q /rom/dev && umount /rom/dev
 }

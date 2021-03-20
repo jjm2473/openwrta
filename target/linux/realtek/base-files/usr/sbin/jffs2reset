@@ -1,0 +1,21 @@
+#!/bin/sh
+
+confirm()
+{
+  local CONFIRM=n
+  [ "$1" == "-y" ] && return 0
+  echo "This will erase all settings and remove any installed packages. Are you sure? [N/y]"
+  read CONFIRM
+  [ "$CONFIRM" == "y" ] && return 0
+  return 1
+}
+
+do_reset()
+{
+  touch /overlay/.reset
+  sync /overlay/.reset
+  exit 0
+}
+
+confirm $1 && do_reset
+exit 0
