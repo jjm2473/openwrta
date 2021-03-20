@@ -62,7 +62,7 @@ mount_loop() {
     fi
 
     echo "overlay loop device $LOOPDEV has no filesystem or resetting, create ext4 at it"
-    mkfs.ext4 -L XXXNASETC $LOOPDEV
+    mkfs.ext4 -q -FF -L XXXNASETC $LOOPDEV
     sync
     mount -t ext4 $LOOPDEV /overlay && return 0
 
