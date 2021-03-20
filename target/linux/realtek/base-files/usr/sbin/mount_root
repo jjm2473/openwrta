@@ -49,17 +49,19 @@ mount_loop() {
         return 1
     fi
 
-    fsck.ext4 -y $LOOPDEV
-    sync
-    mount -t ext4 $LOOPDEV /overlay && return 0
+    if ! dd if=$LOOPDEV bs=5 count=1 | grep -qF RESET; then
+        fsck.ext4 -y $LOOPDEV
+        sync
+        mount -t ext4 $LOOPDEV /overlay && return 0
 
-    # $LOOPDEV already has filesystem, maybe broken or something, dont touch it
-    if [ -n "`block info $LOOPDEV`" ]; then
-        echo "overlay loop device $LOOPDEV already has filesystem, but mount as ext4 failed"
-        return 1
+        # $LOOPDEV already has filesystem, maybe broken or something, dont touch it
+        if [ -n "`block info $LOOPDEV`" ]; then
+            echo "overlay loop device $LOOPDEV already has filesystem, but mount as ext4 failed"
+            return 1
+        fi
     fi
 
-    echo "overlay loop device $LOOPDEV has no filesystem, create ext4 at it"
+    echo "overlay loop device $LOOPDEV has no filesystem or resetting, create ext4 at it"
     mkfs.ext4 -L XXXNASETC $LOOPDEV
     sync
     mount -t ext4 $LOOPDEV /overlay && return 0
