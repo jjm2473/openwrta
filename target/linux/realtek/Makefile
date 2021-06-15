@@ -23,7 +23,7 @@ endef
 
 include $(INCLUDE_DIR)/target.mk
 DEFAULT_PACKAGES += \
-	bash blkid blockdev block-mount ca-bundle curl libustream-mbedtls partx-utils mkf2fs e2fsprogs losetup
+	bash blkid blockdev block-mount ca-bundle curl libustream-mbedtls partx-utils mkf2fs e2fsprogs resize2fs losetup
 
 KERNELNAME:=Image dtbs
 

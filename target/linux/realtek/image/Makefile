@@ -21,17 +21,18 @@ define Device/Default
 	FILESYSTEMS := squashfs
 	IMAGES := ota.zip
 	IMAGE/ota.zip := realtek-ota
+	DEVICE_PACKAGES := rtk-init rtk-android-rootfs rtk-android-kmods rtk-android-xubus
 endef
 
 define Device/zidoo-x9s
+	$(call Device/Default)
 	PROFILES = zidoo-x9s
-	DEVICE_PACKAGES := rtk-init rtk-android-rootfs rtk-android-kmods rtk-android-xubus
 endef
 TARGET_DEVICES += zidoo-x9s
 
 define Device/zidoo-z9s
+	$(call Device/Default)
 	PROFILES = zidoo-z9s
-	DEVICE_PACKAGES := rtk-init rtk-android-rootfs rtk-android-kmods rtk-android-xubus
 endef
 TARGET_DEVICES += zidoo-z9s
 
