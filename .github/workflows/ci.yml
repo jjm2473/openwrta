@@ -40,7 +40,7 @@ jobs:
       FALLBACK_DEVICE_NAME: "${{ matrix.target }}"
     steps:
       - name: Checkout
-        uses: actions/checkout@main
+        uses: actions/checkout@v2
         with:
           path: 'openwrt'
 
