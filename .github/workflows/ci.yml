@@ -55,7 +55,7 @@ jobs:
           sudo swapoff /swapfile || true
           sudo rm -rf /swapfile /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
           sudo -E apt-get -qq update
-          sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev lib32gcc1 libc6-dev-i386 subversion flex uglifyjs gcc-multilib g++-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler antlr3 gperf
+          sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev libc6-dev-i386 subversion flex uglifyjs gcc-multilib g++-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler antlr3 gperf
           sudo -E apt-get -qq install default-jre
           sudo -E apt-get -qq autoremove --purge
           sudo -E apt-get -qq clean
@@ -121,7 +121,7 @@ jobs:
           cd openwrt
           echo -e "$(nproc) thread compile"
           make -j$(nproc) || bash -c 'set -o pipefail ; make -j1 V=s 2>&1 | tee /tmp/openwrt-build.log'
-          echo "::set-output name=status::success"
+          echo "status=success" >> $GITHUB_OUTPUT
           grep '^CONFIG_TARGET.*DEVICE.*=y' .config | sed -r 's/.*DEVICE_(.*)=y/\1/' > DEVICE_NAME
           if [ -s DEVICE_NAME ]; then
             echo "DEVICE_NAME=_$(cat DEVICE_NAME)" >> $GITHUB_ENV
@@ -153,7 +153,7 @@ jobs:
           mv packages ../../../../tmp/
           echo "FIRMWARE=$PWD" >> $GITHUB_ENV
           echo "TARGET_DIR=$(echo $PWD | sed 's#^.*/openwrt/bin/##')" >> $GITHUB_ENV
-          echo "::set-output name=status::success"
+          echo "status=success" >> $GITHUB_OUTPUT
 
       - name: Upload firmware directory
         uses: actions/upload-artifact@main
