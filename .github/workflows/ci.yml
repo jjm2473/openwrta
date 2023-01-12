@@ -9,7 +9,9 @@
 name: Build OTA
 
 on:
-  push
+  push:
+    paths-ignore:
+      - '.github/workflows/debug.yml'
 
 env:
   FEEDS_CONF: feeds.conf.default
