@@ -69,15 +69,20 @@ jobs:
       - name: Install feeds
         run: cd openwrt && ./scripts/feeds install -a
 
-      - name: Print info
-        run: |
-          ip addr
-          ps aux | grep ssh || true
-
       - name: Download ddnsto
         run: |
           wget -O /tmp/ddnsto https://fw.koolcenter.com/binary/ddnsto/linux/ddnsto.amd64
           chmod 755 /tmp/ddnsto
+
+      - name: Configure password
+        run: |
+          echo "### Update user: $USER password ###"
+          echo -e "password\npassword" | passwd
+
+      - name: Print info
+        run: |
+          ip addr
+          ps aux | grep ssh || true
 
       - name: Run ddnsto
         env:
