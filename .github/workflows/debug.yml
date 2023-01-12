@@ -1,0 +1,86 @@
+name: Debug
+
+on:
+  workflow_dispatch:
+
+env:
+  FEEDS_CONF: feeds.conf.default
+  DIY_P1_SH: diy-part1.sh
+  TZ: Asia/Shanghai
+
+jobs:
+  debug:
+    runs-on: ubuntu-latest
+    if: github.event.repository.owner.id == github.event.sender.id
+    name: Debug
+    steps:
+      - name: Checkout
+        uses: actions/checkout@main
+        with:
+          path: 'openwrt'
+
+      - name: Bump config
+        run: |
+          tar -c -C openwrt/.github/workflows . | tar -x
+          ls ./
+          rm -rf openwrt/.github/workflows
+
+      - name: Initialization environment
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          sudo swapoff /swapfile || true
+          sudo rm -rf /swapfile /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
+          sudo -E apt-get -qq update
+          sudo -E apt-get -qq install build-essential asciidoc binutils bzip2 gawk gettext git libncurses5-dev libz-dev patch unzip zlib1g-dev libc6-dev-i386 subversion flex uglifyjs gcc-multilib g++-multilib p7zip p7zip-full msmtp libssl-dev texinfo libglib2.0-dev xmlto qemu-utils upx libelf-dev autoconf automake libtool autopoint device-tree-compiler antlr3 gperf
+          sudo -E apt-get -qq install default-jre
+          # sudo -E apt-get -qq autoremove --purge
+          # sudo -E apt-get -qq clean
+          sudo timedatectl set-timezone "$TZ"
+          # curl -fsSL https://raw.githubusercontent.com/P3TERX/dotfiles/master/.bashrc >> ~/.bashrc
+
+      - name: Load custom feeds
+        run: |
+          [ -e $FEEDS_CONF ] && mv $FEEDS_CONF openwrt/feeds.conf.default
+          chmod +x $DIY_P1_SH
+          cd openwrt
+          ../$DIY_P1_SH
+
+      - name: Update feeds
+        run: cd openwrt && ./scripts/feeds update -a
+
+      - name: Overwrite
+        run: |
+          [ -e overwrite ] && (tar -c -C overwrite . | tar -x -C openwrt)
+
+      - name: Write build key
+        if: env.BUILD_KEY != '' && env.BUILD_KEY_PUB != ''
+        env:
+          BUILD_KEY: ${{ secrets.BUILD_KEY }}
+          BUILD_KEY_PUB: ${{ secrets.BUILD_KEY_PUB }}
+        run: |
+          cd openwrt
+          echo -e "$BUILD_KEY" > key-build
+          echo -e "$BUILD_KEY_PUB" > key-build.pub
+
+      - name: Update feeds index
+        run: cd openwrt && ./scripts/feeds update -ai
+
+      - name: Install feeds
+        run: cd openwrt && ./scripts/feeds install -a
+
+      - name: Print info
+        run: |
+          ip addr
+          ps aux | grep ssh || true
+
+      - name: Download ddnsto
+        run: |
+          wget -O /tmp/ddnsto https://fw.koolcenter.com/binary/ddnsto/linux/ddnsto.amd64
+          chmod 755 /tmp/ddnsto
+
+      - name: Run ddnsto
+        env:
+          DDNSTO_TOKEN: ${{ secrets.DDNSTO_TOKEN }}
+        run: |
+          /tmp/ddnsto -u $DDNSTO_TOKEN
